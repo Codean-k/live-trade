@@ -1701,8 +1701,8 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
   font-weight: 700;
 }
 
-.ma-stat-pct.up { color: var(--buy-strong); }
-.ma-stat-pct.down { color: var(--stop); }
+.ma-stat-pct.up { color: var(--price-up); }
+.ma-stat-pct.down { color: var(--price-down); }
 .ma-stat-pct.dim { color: var(--text-tertiary); }
 
 .ma-tag {
@@ -2653,9 +2653,14 @@ function renderWatchBox(s) {
   `;
 }
 
-function openModal(code) {
+function openModal(code, isRerender = false) {
   const s = allStocks.find(x => x.code === code);
   if (!s) return;
+
+  // 최초 모달 열기일 때만 history에 푸시 (뒤로가기로 닫을 수 있게)
+  if (!isRerender) {
+    history.pushState({ modal: code }, '', '');
+  }
 
   const dt = s.details || {};
   const bd = s.breakdown || {};
@@ -2677,12 +2682,15 @@ function openModal(code) {
     }).join('');
   };
 
+  // 현재가가 MA 대비 어디에 있는지 (한국 차트 컨벤션)
+  // 양수 = 현재가가 MA 위 (정배열성), 음수 = 현재가가 MA 아래 (역배열성)
+  // 색상은 우리 전략 기준 — 음수(과매도)가 우리한테 좋으므로 '매수 기회' 색
   const maPct = (ma) => {
     if (!ma) return { val: '—', cls: 'dim' };
-    const pct = ((ma - s.price) / s.price * 100);
+    const pct = ((s.price - ma) / ma * 100);
     return {
       val: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`,
-      cls: pct > 0 ? 'down' : pct < 0 ? 'up' : 'dim'
+      cls: pct > 0 ? 'up' : pct < 0 ? 'down' : 'dim'
     };
   };
 
@@ -2872,6 +2880,7 @@ function openModal(code) {
               <li><b>MA60</b> · 장기 추세 (60일 평균)</li>
               <li><b>정배열</b> · MA5 > MA20 > MA60 (상승 추세)</li>
               <li><b>역배열</b> · MA5 < MA20 < MA60 (하락 추세, 반등 노림)</li>
+              <li><b>%</b> · 현재가가 해당 MA 대비 어디에 있는지 (+ 위 / − 아래)</li>
             </ul>
           </div>
         </div>
@@ -3017,7 +3026,7 @@ function openModal(code) {
         removeFromWatch(code);
         showToast('관심 전체 해제');
         renderAll();
-        openModal(code);
+        openModal(code, true);
       }
     };
   }
@@ -3033,7 +3042,7 @@ function openModal(code) {
     addWatchEntry(code, memo);
     showToast(`${nthLabel(nextN)} 기록 추가 · ₩${fmt(allStocks.find(x=>x.code===code).price)}`);
     renderAll();
-    openModal(code);
+    openModal(code, true);
   };
 
   if (saveBtn) saveBtn.onclick = () => submitEntry(true);
@@ -3062,7 +3071,7 @@ function openModal(code) {
         removeWatchEntry(code, idx);
         showToast(`${label} 기록 삭제`);
         renderAll();
-        openModal(code);
+        openModal(code, true);
       }
     });
   });
@@ -3082,15 +3091,29 @@ function openModal(code) {
   });
 }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('show');
+function closeModal(fromPopState = false) {
+  const overlay = document.getElementById('modal-overlay');
+  if (!overlay.classList.contains('show')) return;
+  overlay.classList.remove('show');
+  // 사용자가 X/배경 클릭으로 닫은 경우 → history도 뒤로 (URL 정리)
+  if (!fromPopState && history.state && history.state.modal) {
+    history.back();
+  }
 }
+
+// Android 뒤로가기 버튼 / 데스크탑 브라우저 뒤로가기 처리
+window.addEventListener('popstate', () => {
+  const overlay = document.getElementById('modal-overlay');
+  if (overlay.classList.contains('show')) {
+    closeModal(true);
+  }
+});
 
 document.getElementById('modal-overlay').addEventListener('click', (e) => {
   if (e.target.id === 'modal-overlay') closeModal();
 });
 
-document.getElementById('modal-close-x').onclick = closeModal;
+document.getElementById('modal-close-x').onclick = () => closeModal();
 
 let toastTimer;
 function showToast(msg) {
