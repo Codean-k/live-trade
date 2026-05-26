@@ -1,417 +1,502 @@
 """
-LIVE TRADE - 점수 공식 v3.2 스캐너
-코스피200 + 코스닥150 (350종목) → scores.json
-
-v3.2 변경:
-  - 수급 함수 수정 (investor 파라미터)
-  - 이격도 구간 확대 (-15%까지 점수 인정)
-  - 작전주 페널티 단계화 (-30/-60/-100)
-  - 신고가 종목 미세 보정 (-5)
+LIVE TRADE Scanner v3.4
+- 코스피200 + 코스닥150 (350종목)
+- 점수 만점 100점 (환산 없음)
+- 가중치: 낙폭25 + 바닥다지기20 + 반등시작25 + 이격도15 + 수급15 = 100
+- 페널티 별도 차감
 """
 
+import os
 import json
 import time
 from datetime import datetime, timedelta
-from pathlib import Path
-
 import pandas as pd
 from pykrx import stock
 
+# ========================================
+# 설정
+# ========================================
 
-# ============================================================
-# 유틸
-# ============================================================
+TICKERS_FILE = "tickers.json"
+OUTPUT_FILE = "scores.json"
 
-def log(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+# ========================================
+# 유틸리티
+# ========================================
 
-
-def get_business_days(end_date_str: str, n: int = 70):
-    end = datetime.strptime(end_date_str, "%Y%m%d")
-    start = end - timedelta(days=int(n * 1.6))
-    df = stock.get_index_ohlcv(
-        start.strftime("%Y%m%d"),
-        end.strftime("%Y%m%d"),
-        "1028",
-    )
-    days = [d.strftime("%Y%m%d") for d in df.index]
-    return days[-n:]
+def get_trading_dates(n_days=70):
+    """최근 n일 영업일 리스트 (가장 최근이 마지막)"""
+    today = datetime.now().strftime("%Y%m%d")
+    start = (datetime.now() - timedelta(days=n_days + 20)).strftime("%Y%m%d")
+    dates = stock.get_previous_business_days(fromdate=start, todate=today)
+    return [d.strftime("%Y%m%d") for d in dates][-n_days:]
 
 
-def get_last_business_day():
-    d = datetime.now()
-    for _ in range(10):
-        ymd = d.strftime("%Y%m%d")
-        df = stock.get_index_ohlcv(ymd, ymd, "1028")
-        if not df.empty:
-            return ymd
-        d -= timedelta(days=1)
-    raise RuntimeError("영업일 못 찾음")
+def safe_div(a, b, default=0):
+    return a / b if b != 0 else default
 
 
-# ============================================================
-# 데이터 수집
-# ============================================================
+# ========================================
+# 캔들 패턴 인식
+# ========================================
 
-def fetch_ohlcv(code: str, start: str, end: str) -> pd.DataFrame:
-    df = stock.get_market_ohlcv(start, end, code)
-    if df.empty:
-        return df
-    df = df.rename(columns={
-        "시가": "open", "고가": "high", "저가": "low",
-        "종가": "close", "거래량": "volume", "거래대금": "value",
-        "등락률": "change_pct",
-    })
-    if "value" not in df.columns:
-        df["value"] = df["volume"] * df["close"]
-    return df
-
-
-def fetch_supply_bulk(start: str, end: str):
+def detect_candle_pattern(df):
     """
-    KOSPI/KOSDAQ × 외국인/기관 4개 한 번에 받아서 dict로
-    return: {code: {"foreign": int, "institution": int}}
+    최근 캔들 패턴 인식
+    Returns: (today, two_day, three_day)
     """
-    supply = {}
+    if len(df) < 3:
+        return "양봉", None, None
 
-    for market in ["KOSPI", "KOSDAQ"]:
-        for investor, key in [("외국인", "foreign"), ("기관합계", "institution")]:
-            try:
-                df = stock.get_market_net_purchases_of_equities_by_ticker(
-                    start, end, market, investor,
-                )
-                if df.empty:
+    last = df.iloc[-1]
+    prev = df.iloc[-2]
+    prev2 = df.iloc[-3]
+
+    open_p, close, high, low = last["시가"], last["종가"], last["고가"], last["저가"]
+    body = abs(close - open_p)
+    candle_range = high - low
+
+    today_pattern = "양봉" if close >= open_p else "음봉"
+
+    if candle_range > 0:
+        body_ratio = body / candle_range
+        upper_tail = high - max(open_p, close)
+        lower_tail = min(open_p, close) - low
+
+        # 도지
+        if body_ratio < 0.1:
+            today_pattern = "도지"
+        # 망치형
+        elif lower_tail > body * 2 and upper_tail < body * 0.5 and close > open_p:
+            today_pattern = "망치형"
+        # 역망치
+        elif upper_tail > body * 2 and lower_tail < body * 0.5 and close > open_p:
+            today_pattern = "역망치"
+        # 장대양봉
+        elif close > open_p and body_ratio > 0.7 and body > df["종가"].iloc[-20:].std() * 1.5:
+            today_pattern = "장대양봉"
+        # 장대음봉
+        elif close < open_p and body_ratio > 0.7 and body > df["종가"].iloc[-20:].std() * 1.5:
+            today_pattern = "장대음봉"
+
+    # 2캔들 패턴
+    two_day_pattern = None
+    if (
+        prev["종가"] < prev["시가"]
+        and close > open_p
+        and open_p < prev["종가"]
+        and close > prev["시가"]
+    ):
+        two_day_pattern = "상승장악"
+    elif (
+        prev["종가"] > prev["시가"]
+        and close < open_p
+        and open_p > prev["종가"]
+        and close < prev["시가"]
+    ):
+        two_day_pattern = "하락장악"
+
+    # 3캔들 패턴
+    three_day_pattern = None
+    if (
+        prev2["종가"] < prev2["시가"]
+        and abs(prev["종가"] - prev["시가"]) / max(prev["고가"] - prev["저가"], 1) < 0.3
+        and close > open_p
+        and close > (prev2["시가"] + prev2["종가"]) / 2
+    ):
+        three_day_pattern = "샛별"
+
+    return today_pattern, two_day_pattern, three_day_pattern
+
+
+# ========================================
+# 일별 수급 (B 방식)
+# ========================================
+
+def fetch_daily_supply(dates, markets):
+    """5일치 일별 수급. Returns: {ticker: [{date, foreign, inst}, ...]}"""
+    supply_map = {}
+
+    for date in dates:
+        for market in markets:
+            for investor in ["외국인", "기관합계"]:
+                try:
+                    df = stock.get_market_net_purchases_of_equities(
+                        date, date, market, investor
+                    )
+                    if df is None or df.empty:
+                        continue
+
+                    value_col = None
+                    for col in df.columns:
+                        if "순매수" in col and ("대금" in col or "금액" in col):
+                            value_col = col
+                            break
+
+                    if value_col is None:
+                        continue
+
+                    for ticker, row in df.iterrows():
+                        if ticker not in supply_map:
+                            supply_map[ticker] = {}
+                        if date not in supply_map[ticker]:
+                            supply_map[ticker][date] = {"foreign": 0, "inst": 0}
+
+                        key = "foreign" if investor == "외국인" else "inst"
+                        supply_map[ticker][date][key] = int(row[value_col])
+
+                    time.sleep(0.3)
+                except Exception as e:
+                    print(f"  수급 수집 오류 ({date} {market} {investor}): {e}")
                     continue
-                for code, row in df.iterrows():
-                    code_str = str(code).zfill(6)
-                    if code_str not in supply:
-                        supply[code_str] = {"foreign": 0, "institution": 0}
-                    supply[code_str][key] = int(row.get("순매수거래대금", 0))
-            except Exception as e:
-                log(f"⚠️ 수급 {market}/{investor} 실패: {e}")
 
-    return supply
-
-
-# ============================================================
-# 점수 계산
-# ============================================================
-
-def calc_score(df: pd.DataFrame, supply_row: dict):
-    if len(df) < 60:
-        return None, None, None
-
-    close = df["close"]
-    high = df["high"]
-    low = df["low"]
-    vol = df["volume"]
-    val = df["value"]
-
-    today = df.iloc[-1]
-
-    breakdown = {
-        "낙폭": 0, "바닥다지기": 0, "반등시작": 0,
-        "이격도": 0, "수급": 0, "페널티": 0,
-    }
-    details = {}
-
-    # ──────────────────────────────────────────
-    # ① 낙폭 (30점)
-    # ──────────────────────────────────────────
-    high_60d = high.iloc[-60:].max()
-    drop = (today["close"] - high_60d) / high_60d * 100
-    details["drop_60d"] = round(drop, 2)
-
-    if drop <= -25:
-        breakdown["낙폭"] = 30
-    elif drop <= -20:
-        breakdown["낙폭"] = 24
-    elif drop <= -15:
-        breakdown["낙폭"] = 18
-    elif drop <= -10:
-        breakdown["낙폭"] = 12
-    else:
-        breakdown["낙폭"] = 6
-
-    # ──────────────────────────────────────────
-    # ② 바닥다지기 (40점)
-    # ──────────────────────────────────────────
-    vol_5d = vol.iloc[-5:].mean()
-    vol_20d = vol.iloc[-20:].mean()
-    vol_ratio = vol_5d / vol_20d if vol_20d > 0 else 0
-    details["volume_ratio_5d_vs_20d"] = round(vol_ratio, 2)
-    if vol_ratio >= 1.2:
-        breakdown["바닥다지기"] += 15
-
-    std_5d = close.iloc[-5:].std()
-    std_10d = close.iloc[-10:].std()
-    details["std_ratio_5d_vs_10d"] = round(std_5d / std_10d, 2) if std_10d > 0 else 0
-    if std_10d > 0 and std_5d < std_10d:
-        breakdown["바닥다지기"] += 15
-
-    is_bear = today["close"] < today["open"]
-    if is_bear:
-        candle_range = today["high"] - today["low"]
-        if candle_range > 0:
-            tail_recovery = (today["close"] - today["low"]) / candle_range
-            details["tail_recovery"] = round(tail_recovery, 2)
-            if tail_recovery >= 0.5:
-                breakdown["바닥다지기"] += 10
-
-    # ──────────────────────────────────────────
-    # ③ 반등시작 (20점)
-    # ──────────────────────────────────────────
-    is_bull = today["close"] > today["open"]
-    today_vol_ratio = today["volume"] / vol_20d if vol_20d > 0 else 0
-    details["today_volume_ratio"] = round(today_vol_ratio, 2)
-
-    if is_bull and today_vol_ratio >= 1.5:
-        breakdown["반등시작"] += 7
-        if today_vol_ratio >= 2.0:
-            breakdown["반등시작"] += 3
-
-    ma5 = close.rolling(5).mean()
-    if len(ma5) >= 2 and pd.notna(ma5.iloc[-1]) and pd.notna(ma5.iloc[-2]):
-        if ma5.iloc[-1] > ma5.iloc[-2]:
-            breakdown["반등시작"] += 5
-
-    ema12 = close.ewm(span=12, adjust=False).mean()
-    ema26 = close.ewm(span=26, adjust=False).mean()
-    macd = ema12 - ema26
-    signal = macd.ewm(span=9, adjust=False).mean()
-    hist = macd - signal
-    if len(hist) >= 2 and hist.iloc[-2] < 0 and hist.iloc[-1] > 0:
-        breakdown["반등시작"] += 5
-
-    # ──────────────────────────────────────────
-    # ④ 이격도 (15점) - v3.2 완화
-    # ──────────────────────────────────────────
-    ma20 = close.rolling(20).mean().iloc[-1]
-    ma60 = close.rolling(60).mean().iloc[-1]
-    disp20 = (today["close"] - ma20) / ma20 * 100 if ma20 > 0 else 0
-    disp60 = (today["close"] - ma60) / ma60 * 100 if ma60 > 0 else 0
-    details["disparity_20d"] = round(disp20, 2)
-    details["disparity_60d"] = round(disp60, 2)
-
-    # 20일 이격도 (8점) - v3.2: -15% 까지 점수
-    score_d20 = 0
-    if -15 <= disp20 <= -10:
-        score_d20 = 4
-    elif -10 < disp20 <= -7:
-        score_d20 = 4
-    elif -7 < disp20 <= -3:
-        score_d20 = 3
-    if len(close) >= 25:
-        ma20_5d_ago = close.iloc[-25:-5].rolling(20).mean().iloc[-1]
-        if pd.notna(ma20_5d_ago) and ma20_5d_ago > 0:
-            disp20_5d_ago = (close.iloc[-6] - ma20_5d_ago) / ma20_5d_ago * 100
-            if disp20 - disp20_5d_ago >= 3:
-                score_d20 += 2
-            if disp20_5d_ago <= -10:
-                score_d20 += 2
-    breakdown["이격도"] += min(score_d20, 8)
-
-    # 60일 이격도 (7점) - v3.2: -25%까지 점수
-    score_d60 = 0
-    if -25 <= disp60 <= -20:
-        score_d60 = 3
-    elif -20 < disp60 <= -15:
-        score_d60 = 3
-    elif -15 < disp60 <= -10:
-        score_d60 = 4
-    if len(close) >= 65:
-        ma60_5d_ago = close.iloc[-65:-5].rolling(60).mean().iloc[-1]
-        if pd.notna(ma60_5d_ago) and ma60_5d_ago > 0:
-            disp60_5d_ago = (close.iloc[-6] - ma60_5d_ago) / ma60_5d_ago * 100
-            if disp60 - disp60_5d_ago >= 2:
-                score_d60 += 2
-            if disp60_5d_ago <= -20:
-                score_d60 += 1
-    breakdown["이격도"] += min(score_d60, 7)
-
-    # ──────────────────────────────────────────
-    # ⑤ 수급 (15점) - v3.2: bulk dict 룩업
-    # ──────────────────────────────────────────
-    if supply_row:
-        foreign = supply_row.get("foreign", 0)
-        inst = supply_row.get("institution", 0)
-        value_5d = val.iloc[-5:].sum()
-
-        if value_5d > 0:
-            f_ratio = foreign / value_5d * 100
-            i_ratio = inst / value_5d * 100
-            details["foreign_ratio_pct"] = round(f_ratio, 2)
-            details["institution_ratio_pct"] = round(i_ratio, 2)
-
-            if foreign > 0:
-                breakdown["수급"] += 4
-                if f_ratio >= 3:
-                    breakdown["수급"] += 2
-                if f_ratio >= 5:
-                    breakdown["수급"] += 2
-
-            if inst > 0:
-                breakdown["수급"] += 3
-                if i_ratio >= 3:
-                    breakdown["수급"] += 2
-                if i_ratio >= 5:
-                    breakdown["수급"] += 2
-
-    # ──────────────────────────────────────────
-    # 페널티 - v3.2: 작전주 단계화
-    # ──────────────────────────────────────────
-    avg_value_60d = val.iloc[-60:].mean()
-    details["avg_value_60d_won"] = int(avg_value_60d)
-    if avg_value_60d < 500_000_000:
-        breakdown["페널티"] -= 15
-
-    # 작전주: 일일 변동률 ±15% 횟수
-    daily_change = (close.pct_change().abs() * 100).iloc[-60:]
-    big_moves = (daily_change >= 15).sum()
-    details["big_moves_15pct"] = int(big_moves)
-    if big_moves >= 7:
-        breakdown["페널티"] -= 100
-    elif big_moves >= 5:
-        breakdown["페널티"] -= 60
-    elif big_moves >= 3:
-        breakdown["페널티"] -= 30
-
-    # 작전주: 거래량 10배 + ±10% (강력한 신호)
-    vol_spike = (vol.iloc[-60:] > vol.iloc[-60:].mean() * 10)
-    big_change = (daily_change >= 10)
-    if (vol_spike & big_change).any():
-        breakdown["페널티"] -= 100
-
-    # 작전주: 20일 100%+ 급등 (확실한 작전)
-    rolling_return_20d = (close / close.shift(20) - 1) * 100
-    if (rolling_return_20d.iloc[-60:] >= 100).any():
-        breakdown["페널티"] -= 100
-
-    # v3.2 신규: 신고가 종목 미세 보정 (역발상 전략에 안 맞음)
-    if drop > -5 and disp60 > 20:
-        breakdown["페널티"] -= 5
-        details["near_high_warning"] = True
-
-    raw = sum(breakdown.values())
-    return raw, breakdown, details
+    result = {}
+    for ticker, date_data in supply_map.items():
+        sorted_dates = sorted(date_data.keys())
+        result[ticker] = [
+            {
+                "date": d[4:],
+                "foreign": date_data[d]["foreign"],
+                "inst": date_data[d]["inst"],
+            }
+            for d in sorted_dates
+        ]
+    return result
 
 
-def to_grade(score_100: int):
-    if score_100 < 0:
-        return "경고"
-    if score_100 >= 85:
-        return "S"
-    if score_100 >= 70:
-        return "A"
-    if score_100 >= 50:
-        return "B"
-    if score_100 >= 30:
-        return "C"
-    return "D"
+# ========================================
+# 종목별 분석
+# ========================================
+
+def analyze_stock(ticker, name, market, daily_supply):
+    """단일 종목 분석"""
+    try:
+        # 100일 OHLCV
+        today = datetime.now().strftime("%Y%m%d")
+        start = (datetime.now() - timedelta(days=100)).strftime("%Y%m%d")
+        df = stock.get_market_ohlcv(start, today, ticker)
+
+        if df is None or df.empty or len(df) < 30:
+            return None
+
+        if "거래대금" not in df.columns:
+            df["거래대금"] = df["종가"] * df["거래량"]
+
+        if "등락률" not in df.columns:
+            df["등락률"] = df["종가"].pct_change() * 100
+
+        last = df.iloc[-1]
+        price = int(last["종가"])
+        change_pct = float(last["등락률"])
+        high_60d = float(df["고가"].iloc[-60:].max())
+        low_60d = float(df["저가"].iloc[-60:].min())
+
+        # ===== 점수 (100점 만점) =====
+        breakdown = {}
+
+        # ---- 1. 낙폭 (max 25) ----
+        drop_60d = (price - high_60d) / high_60d * 100
+        if drop_60d <= -25:
+            drop_score = 25
+        elif drop_60d <= -20:
+            drop_score = 18
+        elif drop_60d <= -15:
+            drop_score = 10
+        elif drop_60d <= -10:
+            drop_score = 5
+        else:
+            drop_score = 0
+
+        disp_60d = (price - df["종가"].iloc[-60:].mean()) / df["종가"].iloc[-60:].mean() * 100
+        if drop_60d > -5 and disp_60d > 20:
+            drop_score = max(0, drop_score - 5)
+        breakdown["낙폭"] = drop_score
+
+        # ---- 2. 바닥다지기 (max 20) ----
+        vol_5d = df["거래량"].iloc[-5:].mean()
+        vol_20d = df["거래량"].iloc[-20:].mean()
+        vol_60d = df["거래량"].iloc[-60:].mean()
+        vol_ratio_5_20 = safe_div(vol_5d, vol_20d, 1)
+
+        std_5d = df["종가"].iloc[-5:].std()
+        std_10d = df["종가"].iloc[-10:].std()
+        std_ratio = safe_div(std_5d, std_10d, 1)
+
+        base_score = 0
+        if vol_ratio_5_20 >= 1.3:
+            base_score += 8
+        elif vol_ratio_5_20 >= 1.0:
+            base_score += 5
+        if std_ratio < 0.7:
+            base_score += 8
+        elif std_ratio < 0.85:
+            base_score += 5
+        if std_ratio < 0.7 and vol_ratio_5_20 >= 1.2:
+            base_score += 4
+        breakdown["바닥다지기"] = min(base_score, 20)
+
+        # ---- 3. 반등시작 (max 25, 캔들 가산 포함) ----
+        rebound_score = 0
+        if change_pct > 0:
+            rebound_score += 8  # 양봉
+        vol_today_ratio = safe_div(last["거래량"], vol_20d, 1)
+        if vol_today_ratio >= 1.5:
+            rebound_score += 5
+
+        # MACD 양전환
+        ema12 = df["종가"].ewm(span=12).mean()
+        ema26 = df["종가"].ewm(span=26).mean()
+        macd = ema12 - ema26
+        if len(macd) >= 2 and macd.iloc[-1] > 0 and macd.iloc[-2] <= 0:
+            rebound_score += 5
+
+        # 캔들 패턴
+        candle_today, candle_2d, candle_3d = detect_candle_pattern(df)
+
+        # 캔들 가산
+        if candle_today == "망치형":
+            rebound_score += 4
+        elif candle_today == "장대양봉":
+            rebound_score += 6
+        if candle_2d == "상승장악":
+            rebound_score += 7
+        if candle_3d == "샛별":
+            rebound_score += 10
+
+        breakdown["반등시작"] = min(rebound_score, 25)
+
+        # ---- 4. 이격도 (max 15) ----
+        disp_20d = (price - df["종가"].iloc[-20:].mean()) / df["종가"].iloc[-20:].mean() * 100
+        disp_60d_val = disp_60d
+
+        disp_score = 0
+        if -15 <= disp_20d <= -3:
+            disp_score += 8
+        elif -3 < disp_20d <= 0:
+            disp_score += 4
+        if -15 <= disp_60d_val <= -5:
+            disp_score += 5
+
+        # 이격도 회복폭
+        try:
+            ma20_5d_ago = df["종가"].iloc[-25:-5].mean()
+            price_5d_ago = float(df["종가"].iloc[-6])
+            disp_20d_5d_ago = (price_5d_ago - ma20_5d_ago) / ma20_5d_ago * 100
+            disp_recovery = disp_20d - disp_20d_5d_ago
+            if disp_recovery > 3:
+                disp_score += 2
+        except Exception:
+            disp_recovery = 0
+
+        breakdown["이격도"] = min(disp_score, 15)
+
+        # ---- 5. 수급 (max 15) ----
+        supply_data = daily_supply.get(ticker, [])
+        foreign_5d_total = sum(d["foreign"] for d in supply_data) if supply_data else 0
+        inst_5d_total = sum(d["inst"] for d in supply_data) if supply_data else 0
+        combined_5d = foreign_5d_total + inst_5d_total
+
+        foreign_buy_days = sum(1 for d in supply_data if d["foreign"] > 0)
+        inst_buy_days = sum(1 for d in supply_data if d["inst"] > 0)
+
+        supply_score = 0
+        if combined_5d > 0:
+            supply_score += 8
+        if foreign_5d_total > 0:
+            supply_score += 4
+        if inst_5d_total > 0:
+            supply_score += 3
+        breakdown["수급"] = min(supply_score, 15)
+
+        # ---- 매수/매도 우세 판정 ----
+        if combined_5d > 0 and (foreign_buy_days + inst_buy_days) >= 5:
+            dominance = "매수"
+        elif combined_5d < 0 and (foreign_buy_days + inst_buy_days) <= 3:
+            dominance = "매도"
+        else:
+            dominance = "중립"
+
+        # ---- 6. 페널티 ----
+        penalty = 0
+
+        # 작전주 단계화
+        big_moves = sum(1 for r in df["등락률"].iloc[-60:].abs() if r >= 15)
+        if big_moves >= 5:
+            penalty -= 100
+        elif big_moves >= 3:
+            penalty -= 60
+        elif big_moves >= 2:
+            penalty -= 30
+
+        # 거래량 10배 + 변동 10%
+        if vol_today_ratio >= 10 and abs(change_pct) >= 10:
+            penalty -= 100
+
+        # 20일 100%+ 급등
+        try:
+            price_20d_ago = float(df["종가"].iloc[-21])
+            if (price - price_20d_ago) / price_20d_ago >= 1.0:
+                penalty -= 100
+        except Exception:
+            pass
+
+        breakdown["페널티"] = penalty
+
+        # ===== 총점 / 등급 =====
+        raw_total = sum(breakdown.values())  # 페널티 포함
+        total = max(0, min(100, raw_total))
+
+        if penalty <= -100:
+            grade = "경고"
+        elif total >= 80:
+            grade = "S"
+        elif total >= 60:
+            grade = "A"
+        elif total >= 40:
+            grade = "B"
+        elif total >= 20:
+            grade = "C"
+        else:
+            grade = "D"
+
+        # ===== 이동평균 =====
+        ma5 = int(df["종가"].iloc[-5:].mean())
+        ma20 = int(df["종가"].iloc[-20:].mean())
+        ma60 = int(df["종가"].iloc[-60:].mean())
+
+        if ma5 > ma20 > ma60:
+            alignment = "정배열"
+        elif ma5 < ma20 < ma60:
+            alignment = "역배열"
+        else:
+            alignment = "혼조"
+
+        # ===== ATR =====
+        df["tr"] = df.apply(
+            lambda r: max(r["고가"] - r["저가"],
+                          abs(r["고가"] - r["종가"]),
+                          abs(r["저가"] - r["종가"])),
+            axis=1,
+        )
+        atr = int(df["tr"].iloc[-14:].mean())
+
+        # ===== 시가총액 =====
+        try:
+            cap_df = stock.get_market_cap(today, today, ticker)
+            market_cap = int(cap_df["시가총액"].iloc[0]) if not cap_df.empty else 0
+        except Exception:
+            market_cap = 0
+
+        # ===== 결과 =====
+        return {
+            "code": ticker,
+            "name": name,
+            "market": market,
+            "price": price,
+            "change_pct": round(change_pct, 2),
+            "score": total,
+            "grade": grade,
+            "dominance": dominance,
+            "breakdown": breakdown,
+            "details": {
+                "drop_60d": round(drop_60d, 1),
+                "high_60d": int(high_60d),
+                "low_60d": int(low_60d),
+                "disparity_20d": round(disp_20d, 1),
+                "disparity_60d": round(disp_60d_val, 1),
+                "disp_recovery_5d": round(disp_recovery, 1),
+                "volume_ratio_5d_vs_20d": round(vol_ratio_5_20, 2),
+                "volume_today_vs_5d": round(safe_div(last["거래량"], vol_5d, 0), 2),
+                "volume_today_vs_20d": round(vol_today_ratio, 2),
+                "volume_today_vs_60d": round(safe_div(last["거래량"], vol_60d, 0), 2),
+                "std_ratio_5d_vs_10d": round(std_ratio, 2),
+                "std_shrink_pct": round((1 - std_ratio) * 100, 1),
+                "avg_value_60d_won": int(df["거래대금"].iloc[-60:].mean()),
+                "big_moves_15pct": int(big_moves),
+                "atr_14": atr,
+                "market_cap": market_cap,
+                "ma5": ma5,
+                "ma20": ma20,
+                "ma60": ma60,
+                "ma_alignment": alignment,
+                "price_vs_ma5_pct": round((price - ma5) / ma5 * 100, 2),
+                "price_vs_ma20_pct": round((price - ma20) / ma20 * 100, 2),
+                "price_vs_ma60_pct": round((price - ma60) / ma60 * 100, 2),
+                "candle_today": candle_today,
+                "candle_2d": candle_2d,
+                "candle_3d": candle_3d,
+                "foreign_5d_total": foreign_5d_total,
+                "inst_5d_total": inst_5d_total,
+                "combined_5d": combined_5d,
+                "foreign_buy_days": foreign_buy_days,
+                "inst_buy_days": inst_buy_days,
+                "supply_daily": supply_data,
+            },
+        }
+
+    except Exception as e:
+        print(f"  분석 오류 ({ticker} {name}): {e}")
+        return None
 
 
-# ============================================================
+# ========================================
 # 메인
-# ============================================================
+# ========================================
 
 def main():
-    log("LIVE TRADE 스캐너 v3.2 시작")
+    print("=" * 60)
+    print("LIVE TRADE Scanner v3.4 (100점 만점)")
+    print("=" * 60)
 
-    with open("tickers.json", "r", encoding="utf-8") as f:
-        ticker_data = json.load(f)
-    tickers = ticker_data["tickers"]
-    log(f"종목 {len(tickers)}개 로드")
+    # 종목 리스트 로드
+    with open(TICKERS_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    tickers = data["tickers"] if isinstance(data, dict) and "tickers" in data else data
 
-    end = get_last_business_day()
-    days = get_business_days(end, 65)
-    start = days[0]
-    supply_start = days[-5]
-    log(f"기간: {start} ~ {end} (수급은 {supply_start} ~ {end})")
+    print(f"\n총 {len(tickers)}개 종목 스캔 시작")
+    print(f"시작 시간: {datetime.now().strftime('%H:%M:%S')}\n")
 
-    # 수급 데이터 한 번에 받기 (4번 호출, 빠름)
-    log("수급 데이터 받는 중...")
-    supply_data = fetch_supply_bulk(supply_start, end)
-    log(f"수급 데이터 {len(supply_data)}개 로드")
+    # 1단계: 일별 수급
+    print("[1/2] 일별 수급 데이터 수집 중...")
+    dates = get_trading_dates(n_days=5)
+    print(f"  대상 영업일 (최근 5일): {dates}")
 
+    daily_supply = fetch_daily_supply(dates, ["KOSPI", "KOSDAQ"])
+    print(f"  수급 데이터 수집 완료: {len(daily_supply)}개 종목\n")
+
+    # 2단계: 종목별 분석
+    print("[2/2] 종목별 분석 중...")
     results = []
-    fail_count = 0
+    for i, t in enumerate(tickers):
+        result = analyze_stock(t["code"], t["name"], t["market"], daily_supply)
+        if result:
+            results.append(result)
+        if (i + 1) % 50 == 0:
+            print(f"  진행: {i + 1}/{len(tickers)} ({len(results)}개 분석 성공)")
 
-    for i, t in enumerate(tickers, 1):
-        code = t["code"]
-        name = t["name"]
-        market = t["market"]
+    # 점수순 정렬
+    results.sort(key=lambda x: -x["score"])
 
-        try:
-            df = fetch_ohlcv(code, start, end)
-            if df.empty or len(df) < 60:
-                fail_count += 1
-                continue
-
-            supply_row = supply_data.get(code, None)
-
-            raw, breakdown, details = calc_score(df, supply_row)
-            if raw is None:
-                fail_count += 1
-                continue
-
-            score_100 = round(raw * 100 / 120)
-            grade = to_grade(score_100)
-            today_row = df.iloc[-1]
-            prev_row = df.iloc[-2]
-
-            if "change_pct" in df.columns:
-                change_pct = float(today_row["change_pct"])
-            else:
-                change_pct = (today_row["close"] - prev_row["close"]) / prev_row["close"] * 100
-
-            results.append({
-                "code": code,
-                "name": name,
-                "market": market,
-                "score": score_100,
-                "grade": grade,
-                "price": int(today_row["close"]),
-                "change_pct": round(change_pct, 2),
-                "breakdown": breakdown,
-                "details": details,
-            })
-
-            if i % 50 == 0:
-                log(f"진행 {i}/{len(tickers)} (실패 {fail_count}건)")
-
-            time.sleep(0.15)
-        except Exception as e:
-            fail_count += 1
-            if fail_count <= 5:
-                log(f"⚠️ {code} {name} 실패: {e}")
-
-    grade_order = {"S": 0, "A": 1, "B": 2, "C": 3, "D": 4, "경고": 5}
-    results.sort(key=lambda r: (grade_order[r["grade"]], -r["score"]))
-
+    # 저장
     output = {
-        "updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "trading_date": end,
-        "scan_count": len(results),
-        "fail_count": fail_count,
-        "scoring_version": "v3.2",
+        "updated": datetime.now().isoformat(),
+        "version": "v3.4",
+        "count": len(results),
         "results": results,
     }
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
 
-    Path("scores.json").write_text(
-        json.dumps(output, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-
+    # 통계
     grade_counts = {}
     for r in results:
         grade_counts[r["grade"]] = grade_counts.get(r["grade"], 0) + 1
 
-    log("=" * 50)
-    log(f"✅ 완료: 성공 {len(results)} / 실패 {fail_count}")
-    for g in ["S", "A", "B", "C", "D", "경고"]:
-        if g in grade_counts:
-            log(f"  {g}급: {grade_counts[g]}개")
-    log("scores.json 저장됨")
+    print(f"\n{'=' * 60}")
+    print(f"완료: {len(results)}개 분석")
+    print(f"등급 분포: {grade_counts}")
+    print(f"저장: {OUTPUT_FILE}")
+    print(f"종료 시간: {datetime.now().strftime('%H:%M:%S')}")
 
 
 if __name__ == "__main__":
