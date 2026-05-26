@@ -1,21 +1,22 @@
 name: LIVE TRADE Scan
 
 on:
-  # 1. 평일 09:00~15:40, 30분 간격 (KST = UTC+9)
+  # 평일 09:00~15:40, 30분 간격 (KST = UTC+9)
+  # UTC 기준이므로 KST 09:00 = UTC 00:00
   schedule:
-    # UTC 기준이므로 KST 09:00 = UTC 00:00
-    # 평일 (월~금) 00:00 ~ 06:40 UTC, 30분 간격
     - cron: '0,30 0-6 * * 1-5'
     - cron: '40 6 * * 1-5'
+
+  # 수동 실행 (테스트용)
   workflow_dispatch:
+
+  # 코드 변경 시 자동 실행
   push:
     branches: [main]
     paths:
       - 'scanner.py'
       - '.github/workflows/scan.yml'
 
-  # 2. 수동 실행 (테스트용)
-  workflow_dispatch:
 
 jobs:
   scan:
