@@ -1,0 +1,3136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#08090C">
+<title>LIVE TRADE</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Geist+Mono:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/complete/WantedSansVariable.min.css" />
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/projectnoonnu/2406-2@1.0/Paperlogy-8ExtraBold.css" />
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg-base: #08090C;
+  --bg-card: #11141A;
+  --bg-card-hover: #161A22;
+  --bg-elevated: #1C2230;
+  --bg-inset: rgba(255,255,255,0.025);
+  --text-primary: #ECEFF4;
+  --text-secondary: #8B95A3;
+  --text-tertiary: #4E5663;
+  --text-disabled: #2A2F3A;
+  --brand: #5EEAD4;
+  --brand-vivid: #2DD4BF;
+  --brand-dim: rgba(94, 234, 212, 0.12);
+  --brand-border: rgba(94, 234, 212, 0.25);
+  --brand-glow: rgba(94, 234, 212, 0.4);
+  --score-s-bg: rgba(94, 234, 212, 0.15);
+  --score-s-border: rgba(94, 234, 212, 0.35);
+  --score-s-text: #5EEAD4;
+  --score-a-bg: rgba(252, 211, 77, 0.12);
+  --score-a-border: rgba(252, 211, 77, 0.3);
+  --score-a-text: #FCD34D;
+  --score-b-text: #B4BFCD;
+  --score-c-text: #8B95A3;
+  --score-d-text: #6B7383;
+  --score-w-bg: rgba(251, 146, 60, 0.12);
+  --score-w-border: rgba(251, 146, 60, 0.3);
+  --score-w-text: #FB923C;
+  --target: #FCD34D;
+  --stop: #FB923C;
+  --buy-strong: #34D399;
+  --sell-strong: #F87171;
+  --ma5: #FCD34D;
+  --ma20: #4A9EFF;
+  --ma60: #A78BFA;
+  --price-up: #FF5A5A;
+  --price-down: #4A9EFF;
+  --border: rgba(255, 255, 255, 0.05);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --font-display: 'Bricolage Grotesque', 'Wanted Sans Variable', sans-serif;
+  --font-body: 'Wanted Sans Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', -apple-system, sans-serif;
+  --font-kr: 'Wanted Sans Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-display-kr: 'Paperlogy', 'Wanted Sans Variable', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  --font-serif: 'Instrument Serif', serif;
+}
+
+html, body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-feature-settings: 'tnum';
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  min-height: 100vh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+button { background: none; border: none; color: inherit; font: inherit; cursor: pointer; }
+input { background: none; border: none; color: inherit; font: inherit; outline: none; }
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-base);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: -0.025em;
+}
+.logo .accent { color: var(--brand); }
+.logo .dot { color: var(--brand); opacity: 0.6; }
+
+.status-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  background: var(--bg-card);
+  border-radius: 100px;
+  border: 1px solid var(--border-strong);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--buy-strong);
+  box-shadow: 0 0 8px var(--buy-strong);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ========== GRADE GRID + UPDATE BAR ========== */
+.grade-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 16px 6px;
+}
+
+.grade-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.grade-pill.s {
+  background: var(--score-s-bg);
+  border-color: rgba(94, 234, 212, 0.35);
+  box-shadow: 0 0 12px rgba(94, 234, 212, 0.15);
+}
+
+.grade-pill.a {
+  background: var(--score-a-bg);
+  border-color: rgba(252, 211, 77, 0.3);
+}
+
+.grade-pill.w {
+  background: var(--score-w-bg);
+  border-color: var(--score-w-border);
+}
+
+.grade-letter {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.grade-letter.w-kr {
+  font-family: var(--font-kr);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.grade-pill.s .grade-letter { color: var(--brand); text-shadow: 0 0 8px var(--brand-glow); }
+.grade-pill.a .grade-letter { color: var(--score-a-text); }
+.grade-pill.b .grade-letter { color: var(--text-secondary); }
+.grade-pill.w .grade-letter { color: var(--score-w-text); }
+
+.grade-num {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.grade-pill.s .grade-num { color: var(--brand); }
+.grade-pill.a .grade-num { color: var(--score-a-text); }
+.grade-pill.w .grade-num { color: var(--score-w-text); }
+
+.update-bar {
+  margin: 0 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.update-bar-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.update-bar-universe {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.update-bar-universe .sep {
+  color: var(--text-tertiary);
+  margin: 0 4px;
+}
+
+.update-bar-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.update-bar-val {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* SECTION TITLE */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 20px 12px;
+}
+
+.section-title-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: -0.005em;
+}
+
+.section-title-text em { color: var(--brand); font-style: italic; font-weight: 600; }
+
+.section-title-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+/* FILTER TABS */
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 0 16px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-tabs::-webkit-scrollbar { display: none; }
+
+.filter-tab {
+  padding: 7px 13px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.filter-tab.active {
+  background: var(--brand-dim);
+  border-color: var(--brand-border);
+  color: var(--brand);
+}
+
+/* STOCK LIST */
+.stock-list {
+  padding: 0 16px 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stock-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.stock-card:active { transform: scale(0.99); }
+
+.stock-card.grade-S {
+  background: linear-gradient(135deg, rgba(94, 234, 212, 0.06) 0%, var(--bg-card) 60%);
+  border-color: var(--score-s-border);
+}
+
+.stock-card.grade-S::after {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, var(--brand-glow) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.stock-card.grade-A {
+  background: linear-gradient(135deg, rgba(252, 211, 77, 0.05) 0%, var(--bg-card) 60%);
+  border-color: var(--score-a-border);
+}
+
+.stock-card.grade-A::after {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(252, 211, 77, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.card-stock-info { flex: 1; min-width: 0; }
+
+.card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.card-name {
+  font-family: var(--font-kr);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.card-watch-mark { color: var(--brand); font-size: 11px; }
+
+.card-watch-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--target);
+  background: rgba(252, 211, 77, 0.1);
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+.card-watch-diff {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.card-watch-diff.up { color: #FF5A5A; }
+.card-watch-diff.down { color: #4A9EFF; }
+.card-watch-diff.zero { color: var(--text-tertiary); }
+
+
+.card-dominance {
+  font-family: var(--font-kr);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.card-dominance.buy {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--buy-strong);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.card-dominance.sell {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--sell-strong);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.card-dominance.neutral {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.card-code {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.card-market {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-tertiary);
+  padding: 2px 7px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.card-price-row { display: flex; align-items: baseline; gap: 10px; }
+
+.card-price {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.card-change {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-change.up { color: var(--price-up); }
+.card-change.down { color: var(--price-down); }
+.card-change.zero { color: var(--text-tertiary); }
+
+.card-score-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.card-score {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+.stock-card.grade-S .card-score {
+  color: var(--score-s-text);
+  text-shadow: 0 0 20px var(--brand-glow);
+}
+.stock-card.grade-A .card-score { color: var(--score-a-text); }
+.stock-card.grade-B .card-score { color: var(--score-b-text); }
+.stock-card.grade-C .card-score { color: var(--score-c-text); }
+.stock-card.grade-D .card-score { color: var(--score-d-text); }
+.stock-card.grade-W .card-score { color: var(--score-w-text); }
+
+.card-grade-badge {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  letter-spacing: -0.02em;
+  border: 1.5px solid;
+}
+
+.card-grade-badge.S {
+  background: var(--score-s-bg);
+  color: var(--score-s-text);
+  border-color: var(--score-s-border);
+  box-shadow: 0 0 12px var(--brand-glow);
+}
+
+.card-grade-badge.A {
+  background: var(--score-a-bg);
+  color: var(--score-a-text);
+  border-color: var(--score-a-border);
+}
+
+.card-grade-badge.B,
+.card-grade-badge.C,
+.card-grade-badge.D {
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+}
+
+.card-grade-badge.W {
+  background: var(--score-w-bg);
+  color: var(--score-w-text);
+  border-color: var(--score-w-border);
+  font-size: 11px;
+}
+
+.card-breakdown {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-strong);
+  position: relative;
+  z-index: 1;
+}
+
+.bd-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.bd-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bd-bar-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 2px;
+}
+
+.bd-item.zero .bd-bar-fill { background: var(--text-disabled); }
+
+.bd-label {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  letter-spacing: -0.01em;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  color: var(--text-secondary);
+}
+
+.bd-label .num {
+  color: var(--text-primary);
+  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.bd-item.zero .bd-label .num { color: var(--text-disabled); }
+
+/* EMPTY / LOADING */
+.empty-state {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.empty-state-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.empty-state-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-disabled);
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.loading-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+/* SEARCH */
+.search-wrap {
+  margin: 14px 16px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-wrap.focused { border-color: var(--brand-border); }
+.search-icon { color: var(--text-tertiary); font-size: 14px; }
+
+.search-input {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: var(--font-kr);
+}
+
+.search-input::placeholder { color: var(--text-tertiary); }
+
+/* TAB BAR */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  background: rgba(8, 9, 12, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab {
+  padding: 12px 0 14px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+.tab.active { color: var(--brand); }
+
+.tab-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.show { display: flex; animation: fadeIn 0.15s ease-out; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--bg-base);
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 95vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  border-top: 1px solid var(--border-strong);
+  animation: slideUp 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.modal::-webkit-scrollbar { display: none; }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-handle-wrap {
+  padding: 10px 0 0;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  background: var(--bg-base);
+  z-index: 10;
+}
+
+.modal-handle {
+  display: inline-block;
+  width: 36px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.modal-header {
+  padding: 16px 22px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.modal-name {
+  font-family: var(--font-kr);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.modal-dominance {
+  font-family: var(--font-kr);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-dominance.buy {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--buy-strong);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.modal-dominance.sell {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--sell-strong);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.modal-dominance.neutral {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.modal-code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.modal-market {
+  font-family: var(--font-kr);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  padding: 2px 7px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.modal-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.modal-price {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.modal-change {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.modal-change.up { color: var(--price-up); }
+.modal-change.down { color: var(--price-down); }
+
+/* HERO */
+.modal-hero {
+  padding: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-hero.grade-S {
+  background: linear-gradient(135deg, rgba(94, 234, 212, 0.08) 0%, transparent 60%);
+}
+
+.modal-hero.grade-A {
+  background: linear-gradient(135deg, rgba(252, 211, 77, 0.06) 0%, transparent 60%);
+}
+
+.modal-hero-info { flex: 1; }
+
+.modal-hero-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.modal-tagline {
+  font-family: var(--font-display-kr);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+.modal-tagline .accent { color: var(--brand); }
+
+.modal-tagline-sub {
+  font-family: var(--font-kr);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 6px;
+  letter-spacing: -0.01em;
+}
+
+.modal-hero-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.modal-hero-score {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 56px;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+}
+
+.modal-hero.grade-S .modal-hero-score {
+  color: var(--score-s-text);
+  text-shadow: 0 0 24px var(--brand-glow);
+}
+.modal-hero.grade-A .modal-hero-score { color: var(--score-a-text); }
+.modal-hero.grade-B .modal-hero-score { color: var(--score-b-text); }
+.modal-hero.grade-C .modal-hero-score { color: var(--score-c-text); }
+.modal-hero.grade-D .modal-hero-score { color: var(--score-d-text); }
+.modal-hero.grade-W .modal-hero-score { color: var(--score-w-text); }
+
+.modal-hero-badge {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  width: 46px; height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 2px solid;
+}
+
+.modal-hero-badge.S {
+  background: var(--score-s-bg);
+  color: var(--score-s-text);
+  border-color: var(--score-s-border);
+  box-shadow: 0 0 18px var(--brand-glow);
+}
+
+.modal-hero-badge.A {
+  background: var(--score-a-bg);
+  color: var(--score-a-text);
+  border-color: var(--score-a-border);
+}
+
+.modal-hero-badge.B,
+.modal-hero-badge.C,
+.modal-hero-badge.D {
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--text-secondary);
+  border-color: var(--border-strong);
+  font-size: 24px;
+}
+
+.modal-hero-badge.W {
+  background: var(--score-w-bg);
+  color: var(--score-w-text);
+  border-color: var(--score-w-border);
+  font-size: 14px;
+}
+
+/* AI BOX */
+.modal-ai {
+  margin: 18px;
+  padding: 16px 18px;
+  background: var(--bg-inset);
+  border-radius: 12px;
+  border-left: 2px solid var(--brand);
+}
+
+.modal-ai-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.modal-ai-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--brand);
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 4px 8px;
+  background: var(--brand-dim);
+  border-radius: 4px;
+}
+
+.modal-ai-title {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.modal-ai-narrative {
+  font-family: var(--font-kr);
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.75;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.modal-ai-narrative .h { color: var(--brand); font-weight: 800; }
+.modal-ai-narrative .p { color: var(--text-primary); font-weight: 700; }
+.modal-ai-narrative .n { color: var(--stop); font-weight: 800; }
+
+.modal-ai-targets {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.modal-ai-target {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.modal-ai-target-label {
+  color: var(--text-tertiary);
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.modal-ai-target-val {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.modal-ai-target.target .modal-ai-target-val { color: var(--target); }
+.modal-ai-target.stop .modal-ai-target-val { color: var(--stop); }
+
+/* CHART */
+.modal-chart {
+  margin: 0 18px 14px;
+  padding: 14px 4px 10px 4px;
+  background: var(--bg-inset);
+  border-radius: 12px;
+  border-left: 2px solid var(--brand);
+}
+
+.modal-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px 10px;
+}
+
+.modal-chart-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-chart-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--brand);
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 4px 8px;
+  background: var(--brand-dim);
+  border-radius: 4px;
+}
+
+.modal-chart-title {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.modal-chart-legend {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.modal-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+}
+
+.modal-chart-legend-dot {
+  width: 8px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.modal-chart-svg-wrap {
+  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.modal-chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.modal-chart-empty {
+  padding: 30px 14px;
+  text-align: center;
+  font-family: var(--font-kr);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* SVG inner styles */
+.chart-line-ma5 { fill: none; stroke: #FCD34D; stroke-width: 1; stroke-opacity: 0.6; }
+.chart-line-ma20 { fill: none; stroke: #4A9EFF; stroke-width: 1; stroke-opacity: 0.6; }
+.chart-line-ma60 { fill: none; stroke: #A78BFA; stroke-width: 1; stroke-opacity: 0.6; }
+.chart-grid { stroke: rgba(255, 255, 255, 0.04); stroke-width: 0.5; }
+.chart-axis-text {
+  fill: #4E5663;
+  font-family: 'Geist Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 600;
+}
+.chart-high-line { stroke: rgba(255, 90, 90, 0.35); stroke-width: 0.5; stroke-dasharray: 2 2; }
+.chart-low-line { stroke: rgba(74, 158, 255, 0.35); stroke-width: 0.5; stroke-dasharray: 2 2; }
+.chart-current-line { stroke: rgba(94, 234, 212, 0.4); stroke-width: 0.5; stroke-dasharray: 1 2; }
+.chart-current-label-bg { fill: var(--brand); rx: 2; }
+.chart-current-label { fill: #0A0C10; font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 800; }
+.chart-watch-star { fill: #FCD34D; }
+.chart-watch-star-line { stroke: #FCD34D; stroke-width: 0.6; stroke-dasharray: 1 1.5; stroke-opacity: 0.6; }
+.chart-watch-nth { fill: #FCD34D; font-family: 'Geist Mono', monospace; font-size: 8px; font-weight: 800; }
+
+/* WATCH HISTORY BOX */
+.modal-watch {
+  margin: 0 18px 18px;
+  padding: 16px 18px;
+  background: var(--bg-inset);
+  border-radius: 12px;
+  border-left: 2px solid var(--target);
+}
+
+.modal-watch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.modal-watch-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-watch-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--target);
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  padding: 4px 8px;
+  background: rgba(252, 211, 77, 0.12);
+  border-radius: 4px;
+}
+
+.modal-watch-title {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.modal-watch-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--target);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+/* Entries list */
+.watch-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.watch-entry {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 12px 14px;
+  position: relative;
+}
+
+.watch-entry-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.watch-entry-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.watch-entry-nth {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--target);
+  letter-spacing: -0.02em;
+}
+
+.watch-entry-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.watch-entry-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.watch-entry-price {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.watch-entry-diff {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.watch-entry-diff.up { color: #FF5A5A; }
+.watch-entry-diff.down { color: #4A9EFF; }
+.watch-entry-diff.zero { color: var(--text-tertiary); }
+
+.watch-entry-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.watch-entry-score-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+.watch-entry-score-chip.S { background: rgba(252, 211, 77, 0.15); color: #FCD34D; }
+.watch-entry-score-chip.A { background: rgba(252, 211, 77, 0.12); color: #FCD34D; }
+.watch-entry-score-chip.B { background: rgba(94, 234, 212, 0.12); color: var(--brand); }
+.watch-entry-score-chip.C { background: rgba(167, 139, 250, 0.12); color: #A78BFA; }
+.watch-entry-score-chip.D { background: rgba(255, 255, 255, 0.05); color: var(--text-tertiary); }
+.watch-entry-score-chip.W { background: rgba(251, 146, 60, 0.15); color: var(--stop); }
+
+.watch-entry-memo {
+  font-family: var(--font-kr);
+  font-size: 12px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-weight: 500;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.watch-entry-memo.empty {
+  color: var(--text-tertiary);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.watch-entry-delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.watch-entry-delete:hover {
+  background: rgba(251, 146, 60, 0.12);
+  color: var(--stop);
+}
+
+/* Add new entry form */
+.watch-add {
+  background: var(--bg-card);
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.watch-add-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.watch-add-title {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.watch-add-snapshot {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.watch-add-snapshot .nth {
+  color: var(--target);
+  font-weight: 800;
+  margin-right: 6px;
+}
+
+.watch-add-textarea {
+  width: 100%;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-family: var(--font-kr);
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 500;
+  resize: vertical;
+  min-height: 56px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.watch-add-textarea:focus {
+  border-color: var(--brand-border);
+}
+
+.watch-add-textarea::placeholder {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.watch-add-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.watch-add-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.watch-add-btn.primary {
+  background: var(--brand);
+  color: #0A0C10;
+}
+
+.watch-add-btn.primary:hover {
+  background: var(--brand-vivid);
+}
+
+.watch-add-btn.ghost {
+  background: transparent;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-strong);
+}
+
+.watch-add-btn.ghost:hover {
+  color: var(--text-primary);
+  border-color: var(--text-tertiary);
+}
+
+/* Empty state for add form when no entries yet */
+.watch-empty-hint {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ANALYSIS CARDS */
+.modal-analysis { padding: 4px 16px 18px; }
+
+.acard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.acard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+}
+
+.acard-title-row { display: flex; align-items: center; gap: 6px; }
+
+.acard-title {
+  font-family: var(--font-kr);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.acard-subtitle {
+  font-family: var(--font-kr);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.acard-score-row { display: flex; align-items: center; gap: 8px; }
+
+.acard-score {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+}
+.acard-score .num { color: var(--text-primary); }
+.acard-score .max { color: var(--text-tertiary); font-weight: 500; }
+
+.info-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.info-btn.open {
+  background: var(--brand);
+  color: var(--bg-base);
+  border-color: var(--brand);
+  box-shadow: 0 0 8px var(--brand-glow);
+}
+
+.info-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  background: var(--bg-elevated);
+  margin: 0 16px;
+  border-radius: 8px;
+}
+
+.info-panel.open {
+  max-height: 800px;
+  margin: 0 16px 12px;
+}
+
+.info-panel-inner {
+  padding: 14px 16px;
+  font-family: var(--font-kr);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+.info-panel-title {
+  font-family: var(--font-kr);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--brand);
+  margin-bottom: 6px;
+}
+
+.info-panel-list {
+  margin: 8px 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.info-panel-list li {
+  padding: 3px 0;
+  font-family: var(--font-kr);
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  position: relative;
+  padding-left: 14px;
+}
+
+.info-panel-list li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.info-panel-list li b {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.acard-bar {
+  margin: 0 16px 8px;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.acard-bar-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(94, 234, 212, 0.3);
+}
+
+.acard-comment {
+  padding: 8px 16px 12px;
+  font-family: var(--font-kr);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  font-weight: 500;
+}
+
+.acard-comment .h { color: var(--brand); font-weight: 800; }
+.acard-comment .n { color: var(--stop); font-weight: 800; }
+.acard-comment .p { color: var(--text-primary); font-weight: 700; }
+
+.acard-data {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  margin: 0 16px 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+}
+
+.acard-data-cell {
+  background: var(--bg-elevated);
+  padding: 9px 8px;
+  text-align: center;
+}
+
+.acard-data-label {
+  font-family: var(--font-kr);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.acard-data-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.acard-data-val.up { color: var(--buy-strong); }
+.acard-data-val.down { color: var(--stop); }
+.acard-data-val.brand { color: var(--brand); }
+.acard-data-val.text { font-family: var(--font-kr); font-size: 11px; }
+
+/* MA */
+.ma-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin: 0 16px 14px;
+}
+
+.ma-stat {
+  padding: 8px 4px;
+  text-align: center;
+  background: var(--bg-elevated);
+  border-radius: 6px;
+  border-top: 2px solid;
+}
+
+.ma-stat.now { border-color: var(--brand); box-shadow: 0 0 10px rgba(94,234,212,0.15); }
+.ma-stat.ma5 { border-color: var(--ma5); }
+.ma-stat.ma20 { border-color: var(--ma20); }
+.ma-stat.ma60 { border-color: var(--ma60); }
+
+.ma-stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+.ma-stat.now .ma-stat-label { color: var(--brand); }
+.ma-stat.ma5 .ma-stat-label { color: var(--ma5); }
+.ma-stat.ma20 .ma-stat-label { color: var(--ma20); }
+.ma-stat.ma60 .ma-stat-label { color: var(--ma60); }
+
+.ma-stat-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.ma-stat-pct {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.ma-stat-pct.up { color: var(--buy-strong); }
+.ma-stat-pct.down { color: var(--stop); }
+.ma-stat-pct.dim { color: var(--text-tertiary); }
+
+.ma-tag {
+  display: inline-block;
+  font-family: var(--font-kr);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 100px;
+  margin: 0 16px 8px;
+}
+
+.ma-tag.정배열 {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--buy-strong);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.ma-tag.역배열 {
+  background: rgba(251, 146, 60, 0.15);
+  color: var(--stop);
+  border: 1px solid rgba(251, 146, 60, 0.3);
+}
+
+.ma-tag.혼조 {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-secondary);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* SUPPLY */
+.supply-top {
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+  border-radius: 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.supply-top-label {
+  font-family: var(--font-kr);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.supply-top-val {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 2px;
+}
+
+.supply-top-val.buy { color: var(--buy-strong); }
+.supply-top-val.sell { color: var(--sell-strong); }
+
+.supply-dom {
+  font-family: var(--font-kr);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.supply-dom.buy {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--buy-strong);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.supply-dom.sell {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--sell-strong);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.supply-dom.neutral {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.supply-lines {
+  margin: 0 16px 12px;
+  padding: 14px;
+  background: var(--bg-elevated);
+  border-radius: 10px;
+}
+
+.supply-scale {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0 78px 6px 60px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.supply-line {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.04);
+}
+
+.supply-line:last-child { border-bottom: none; }
+
+.supply-line-label {
+  font-family: var(--font-kr);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.supply-line.foreign .supply-line-label { color: var(--brand); }
+.supply-line.inst .supply-line-label { color: var(--ma5); }
+
+.supply-dots {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.supply-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.supply-dot.buy {
+  background: var(--buy-strong);
+  box-shadow: 0 0 4px var(--buy-strong), 0 0 9px rgba(52, 211, 153, 0.7), 0 0 16px rgba(52, 211, 153, 0.4);
+}
+
+.supply-dot.sell {
+  background: var(--sell-strong);
+  box-shadow: 0 0 4px var(--sell-strong), 0 0 9px rgba(248, 113, 113, 0.7), 0 0 16px rgba(248, 113, 113, 0.4);
+}
+
+.supply-dot.zero {
+  background: var(--text-disabled);
+  box-shadow: none;
+}
+
+.supply-line-total {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: right;
+  min-width: 64px;
+}
+
+.supply-line-total.buy { color: var(--buy-strong); }
+.supply-line-total.sell { color: var(--sell-strong); }
+
+/* ACTIONS */
+.modal-actions {
+  padding: 16px 22px 26px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-family: var(--font-kr);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  border: 1px solid transparent;
+  cursor: pointer;
+  letter-spacing: -0.005em;
+}
+
+.btn-primary { background: var(--brand); color: var(--bg-base); }
+.btn-primary:active { background: var(--brand-vivid); }
+
+.btn-secondary {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.btn-secondary.active {
+  background: var(--brand-dim);
+  border-color: var(--brand-border);
+  color: var(--brand);
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--brand-border);
+  color: var(--text-primary);
+  padding: 10px 18px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-kr);
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.toast.show { opacity: 1; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">LIVE<span class="dot">·</span><span class="accent">TRADE</span></div>
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    <span id="status-text">LOADING</span>
+  </div>
+</header>
+
+<!-- SIGNAL -->
+<section class="section active" id="section-signal">
+  <div class="grade-grid">
+    <div class="grade-pill s">
+      <div class="grade-letter">S</div>
+      <div class="grade-num" id="stat-s">—</div>
+    </div>
+    <div class="grade-pill a">
+      <div class="grade-letter">A</div>
+      <div class="grade-num" id="stat-a">—</div>
+    </div>
+    <div class="grade-pill b">
+      <div class="grade-letter">B</div>
+      <div class="grade-num" id="stat-b">—</div>
+    </div>
+    <div class="grade-pill w">
+      <div class="grade-letter w-kr">경고</div>
+      <div class="grade-num" id="stat-w">—</div>
+    </div>
+  </div>
+
+  <div class="update-bar">
+    <span class="update-bar-label">UPDATED</span>
+    <span class="update-bar-universe">KOSPI 200<span class="sep">·</span>KOSDAQ 150</span>
+    <span class="update-bar-date" id="stat-date">—</span>
+    <span class="update-bar-val" id="stat-updated">—</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-title-text">Today's <em>signals</em></div>
+    <div class="section-title-count" id="filter-count">—</div>
+  </div>
+
+  <div class="filter-tabs" id="filter-tabs">
+    <button class="filter-tab active" data-filter="all">ALL</button>
+    <button class="filter-tab" data-filter="S">S</button>
+    <button class="filter-tab" data-filter="A">A</button>
+    <button class="filter-tab" data-filter="B">B</button>
+    <button class="filter-tab" data-filter="C">C</button>
+    <button class="filter-tab" data-filter="D">D</button>
+    <button class="filter-tab" data-filter="경고">경고</button>
+    <button class="filter-tab" data-filter="KOSPI200">KOSPI200</button>
+    <button class="filter-tab" data-filter="KOSDAQ150">KOSDAQ150</button>
+  </div>
+
+  <div class="stock-list" id="signal-list">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">SCANNING 350 STOCKS</div>
+    </div>
+  </div>
+</section>
+
+<!-- WATCH -->
+<section class="section" id="section-watch">
+  <div class="grade-grid">
+    <div class="grade-pill s">
+      <div class="grade-letter w-kr">WATCHED</div>
+      <div class="grade-num" id="watch-count">0</div>
+    </div>
+    <div class="grade-pill a">
+      <div class="grade-letter w-kr">평균</div>
+      <div class="grade-num" id="watch-avg">—</div>
+    </div>
+    <div class="grade-pill b" style="opacity:0.3"></div>
+    <div class="grade-pill b" style="opacity:0.3"></div>
+  </div>
+
+  <div class="update-bar">
+    <span class="update-bar-label">UPDATED</span>
+    <span class="update-bar-universe">My watchlist</span>
+    <span class="update-bar-date" id="watch-date">—</span>
+    <span class="update-bar-val" id="watch-updated">—</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-title-text">My <em>watchlist</em></div>
+    <div class="section-title-count">SAVED</div>
+  </div>
+
+  <div class="stock-list" id="watch-list">
+    <div class="empty-state">
+      <div class="empty-state-text">No watchlist yet</div>
+      <div class="empty-state-sub">TAP ★ ON ANY STOCK</div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<section class="section" id="section-search">
+  <div class="search-wrap" id="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="search-input" placeholder="종목명 또는 코드 검색...">
+  </div>
+  <div class="section-title">
+    <div class="section-title-text"><em>Search</em> 350 stocks</div>
+    <div class="section-title-count" id="search-count">KOSPI200 + KOSDAQ150</div>
+  </div>
+  <div class="stock-list" id="search-list">
+    <div class="empty-state">
+      <div class="empty-state-text">Search by name or code</div>
+      <div class="empty-state-sub">350 STOCKS AVAILABLE</div>
+    </div>
+  </div>
+</section>
+
+<!-- TAB BAR -->
+<nav class="tab-bar">
+  <button class="tab active" data-section="signal">
+    <span class="tab-icon">◈</span>SIGNAL
+  </button>
+  <button class="tab" data-section="watch">
+    <span class="tab-icon">★</span>WATCH
+  </button>
+  <button class="tab" data-section="search">
+    <span class="tab-icon">⌕</span>SEARCH
+  </button>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <div class="modal-handle-wrap">
+      <div class="modal-handle"></div>
+      <button class="modal-close" id="modal-close-x">×</button>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCORES_URL = (location.protocol === 'file:' || location.hostname === 'localhost')
+  ? 'scores.json'
+  : 'https://raw.githubusercontent.com/Codean-k/live-trade/main/scores.json';
+
+const LS_WATCH = 'lt_watch_v2';
+
+let allStocks = [];
+let updatedAt = '';
+let currentFilter = 'all';
+let watchList = loadWatch();
+
+const candleDesc = {
+  '양봉': '오늘 상승 마감',
+  '음봉': '오늘 하락 마감',
+  '도지': '시가≈종가, 방향 보류',
+  '망치형': '저점 찍고 반등 시작 ★',
+  '역망치': '반등 시도 후 눌림',
+  '장대양봉': '강한 매수세 출현 ★',
+  '장대음봉': '강한 매도세',
+};
+
+const candle2DDesc = {
+  '상승장악': '어제 음봉을 덮은 큰 양봉 ★',
+  '하락장악': '어제 양봉을 덮은 큰 음봉',
+};
+
+const candle3DDesc = {
+  '샛별': '음→도지→양, 강한 반등 신호 ★★',
+  '저녁별': '양→도지→음, 천정 신호',
+};
+
+async function loadScores() {
+  try {
+    const res = await fetch(SCORES_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('네트워크 오류');
+    const data = await res.json();
+    allStocks = data.results || [];
+    updatedAt = data.updated || '';
+    document.getElementById('status-text').textContent = 'LIVE';
+    renderAll();
+  } catch (e) {
+    document.getElementById('status-text').textContent = 'OFFLINE';
+    document.getElementById('signal-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-text">데이터를 불러올 수 없습니다</div>
+        <div class="empty-state-sub">${e.message}</div>
+      </div>`;
+  }
+}
+
+function loadWatch() {
+  try { return JSON.parse(localStorage.getItem(LS_WATCH)) || {}; }
+  catch { return {}; }
+}
+
+function saveWatch() {
+  localStorage.setItem(LS_WATCH, JSON.stringify(watchList));
+}
+
+function isWatching(code) { return code in watchList && watchList[code].entries && watchList[code].entries.length > 0; }
+
+function getWatchEntries(code) {
+  return (watchList[code] && watchList[code].entries) || [];
+}
+
+function addWatchEntry(code, memo) {
+  const s = allStocks.find(x => x.code === code);
+  if (!s) return;
+  if (!watchList[code]) watchList[code] = { entries: [] };
+  watchList[code].entries.push({
+    ts: new Date().toISOString(),
+    price: s.price,
+    score: s.score,
+    grade: s.grade,
+    memo: (memo || '').trim(),
+  });
+  saveWatch();
+}
+
+function removeWatchEntry(code, index) {
+  if (!watchList[code] || !watchList[code].entries) return;
+  watchList[code].entries.splice(index, 1);
+  if (watchList[code].entries.length === 0) delete watchList[code];
+  saveWatch();
+}
+
+function removeFromWatch(code) {
+  delete watchList[code];
+  saveWatch();
+}
+
+function nthLabel(n) {
+  if (n === 1) return '1차';
+  if (n === 2) return '2차';
+  if (n === 3) return '3차';
+  return `${n}차`;
+}
+
+function fmt(n) { return Number(n).toLocaleString('ko-KR'); }
+function fmtChange(c) { return `${c > 0 ? '+' : ''}${c.toFixed(2)}%`; }
+function changeClass(c) { return c > 0 ? 'up' : c < 0 ? 'down' : 'zero'; }
+function gradeClass(grade) { return grade === '경고' ? 'W' : grade; }
+function fmtBillion(won) { return Math.round(won / 100000000); }
+
+function formatTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function generateTagline(s) {
+  if (s.score >= 80) return ['강력한', '반등 신호', '바닥 다지기 완료 + 매수세 유입'];
+  if (s.score >= 60) return ['유의미한', '반등 후보', '낙폭 + 회복 신호 확인'];
+  if (s.score >= 40) return ['관심', '필요 종목', '추가 신호 대기 중'];
+  if (s.score >= 20) return ['약한', '신호', '전체적으로 미흡'];
+  return ['관망', '구간', '신호 부족'];
+}
+
+function generateAINarrative(s) {
+  const dt = s.details || {};
+  const drop = dt.drop_60d;
+  const fdays = dt.foreign_buy_days || 0;
+  const idays = dt.inst_buy_days || 0;
+
+  let lines = [];
+
+  if (s.score >= 60) {
+    lines.push(`현재는 <span class="h">매수 관심 구간</span>으로 판단됩니다.`);
+  } else if (s.score >= 40) {
+    lines.push(`<span class="h">추가 신호 대기</span> 구간입니다.`);
+  } else {
+    lines.push(`현재는 <span class="n">관망 구간</span>입니다.`);
+  }
+
+  if (drop != null) {
+    if (drop <= -25) lines.push(`60일 고점 대비 <span class="p">${drop.toFixed(1)}%</span> 깊은 조정입니다.`);
+    else if (drop <= -15) lines.push(`60일 고점 대비 <span class="p">${drop.toFixed(1)}%</span> 의미있는 조정입니다.`);
+  }
+
+  if (fdays >= 3) lines.push(`외국인이 5일 중 ${fdays}일 순매수했습니다.`);
+  if (idays >= 3) lines.push(`기관이 5일 중 ${idays}일 순매수했습니다.`);
+
+  const targetPrice = dt.ma60 || Math.round(s.price * 1.1);
+  const stopPrice = dt.low_60d ? Math.round(dt.low_60d * 0.97) : Math.round(s.price * 0.945);
+
+  if (s.score >= 40) {
+    lines.push(`<span class="p">${fmt(targetPrice)}원</span>(60일 MA) 회복을 노려볼 만하며, <span class="p">${fmt(stopPrice)}원</span> 아래로 빠지면 추세가 깨질 수 있습니다.`);
+  }
+
+  return { narrative: lines.join(' '), targetPrice, stopPrice };
+}
+
+function renderStockCard(s) {
+  const gc = gradeClass(s.grade);
+  const bd = s.breakdown || {};
+  const watching = isWatching(s.code);
+  const entries = getWatchEntries(s.code);
+  const dom = s.dominance || '중립';
+  const domClass = dom === '매수' ? 'buy' : dom === '매도' ? 'sell' : 'neutral';
+  const domIcon = dom === '매수' ? '▲' : dom === '매도' ? '▼' : '·';
+
+  let watchBadge = '';
+  if (watching && entries.length > 0) {
+    const firstPrice = entries[0].price;
+    const diff = ((s.price - firstPrice) / firstPrice * 100);
+    const diffCls = diff > 0.05 ? 'up' : diff < -0.05 ? 'down' : 'zero';
+    const diffStr = `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}%`;
+    watchBadge = `<span class="card-watch-badge">★ ${entries.length}차 <span class="card-watch-diff ${diffCls}">${diffStr}</span></span>`;
+  }
+
+  return `
+    <div class="stock-card grade-${gc}" data-code="${s.code}">
+      <div class="card-top">
+        <div class="card-stock-info">
+          <div class="card-name-row">
+            <span class="card-name">${s.name}</span>
+            ${watchBadge}
+            <span class="card-dominance ${domClass}"><span>${domIcon}</span>${dom}</span>
+          </div>
+          <div class="card-meta">
+            <span class="card-code">${s.code}</span>
+            <span class="card-market">${s.market}</span>
+          </div>
+          <div class="card-price-row">
+            <span class="card-price">₩${fmt(s.price)}</span>
+            <span class="card-change ${changeClass(s.change_pct)}">${fmtChange(s.change_pct)}</span>
+          </div>
+        </div>
+        <div class="card-score-block">
+          <div class="card-score">${s.score}</div>
+          <div class="card-grade-badge ${gc}">${s.grade}</div>
+        </div>
+      </div>
+      <div class="card-breakdown">
+        ${renderBdItem('낙폭', bd['낙폭'] || 0, 25)}
+        ${renderBdItem('바닥', bd['바닥다지기'] || 0, 20)}
+        ${renderBdItem('반등', bd['반등시작'] || 0, 25)}
+        ${renderBdItem('이격', bd['이격도'] || 0, 15)}
+        ${renderBdItem('수급', bd['수급'] || 0, 15)}
+      </div>
+    </div>
+  `;
+}
+
+function renderBdItem(label, val, max) {
+  const pct = Math.max(0, (val / max) * 100);
+  const zero = val === 0 ? ' zero' : '';
+  return `
+    <div class="bd-item${zero}">
+      <div class="bd-bar"><div class="bd-bar-fill" style="width:${pct}%"></div></div>
+      <div class="bd-label"><span>${label}</span><span class="num">${val}</span></div>
+    </div>
+  `;
+}
+
+function renderSignal() {
+  const list = document.getElementById('signal-list');
+  let filtered = allStocks;
+
+  if (currentFilter !== 'all') {
+    if (['S','A','B','C','D','경고'].includes(currentFilter)) {
+      filtered = allStocks.filter(s => s.grade === currentFilter);
+    } else if (currentFilter.startsWith('KOSPI') || currentFilter.startsWith('KOSDAQ')) {
+      filtered = allStocks.filter(s => s.market === currentFilter);
+    }
+  }
+
+  document.getElementById('filter-count').textContent = `${filtered.length} RESULTS`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-text">No matches</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(renderStockCard).join('');
+
+  const counts = { S: 0, A: 0, B: 0, '경고': 0 };
+  allStocks.forEach(s => { if (counts[s.grade] !== undefined) counts[s.grade]++; });
+  document.getElementById('stat-s').textContent = counts.S;
+  document.getElementById('stat-a').textContent = counts.A;
+  document.getElementById('stat-b').textContent = counts.B;
+  document.getElementById('stat-w').textContent = counts['경고'];
+  document.getElementById('stat-updated').textContent = formatTime(updatedAt);
+  document.getElementById('stat-date').textContent = formatDate(updatedAt);
+}
+
+function renderWatch() {
+  const list = document.getElementById('watch-list');
+  const watched = allStocks.filter(s => isWatching(s.code));
+
+  document.getElementById('watch-count').textContent = watched.length;
+  document.getElementById('watch-updated').textContent = formatTime(updatedAt);
+  document.getElementById('watch-date').textContent = formatDate(updatedAt);
+
+  if (watched.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-text">No watchlist yet</div>
+        <div class="empty-state-sub">TAP ★ ON ANY STOCK</div>
+      </div>`;
+    document.getElementById('watch-avg').textContent = '—';
+    return;
+  }
+
+  const avg = Math.round(watched.reduce((s, x) => s + x.score, 0) / watched.length);
+  document.getElementById('watch-avg').textContent = avg;
+  list.innerHTML = watched.map(renderStockCard).join('');
+}
+
+function renderSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const list = document.getElementById('search-list');
+
+  if (!q) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-text">Search by name or code</div>
+        <div class="empty-state-sub">350 STOCKS AVAILABLE</div>
+      </div>`;
+    document.getElementById('search-count').textContent = 'KOSPI200 + KOSDAQ150';
+    return;
+  }
+
+  const matches = allStocks.filter(s =>
+    s.name.toLowerCase().includes(q) || s.code.includes(q)
+  ).slice(0, 30);
+
+  document.getElementById('search-count').textContent = `${matches.length} RESULTS`;
+
+  if (matches.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-text">No matches for "${q}"</div></div>`;
+    return;
+  }
+
+  list.innerHTML = matches.map(renderStockCard).join('');
+}
+
+function renderAll() {
+  renderSignal();
+  renderWatch();
+}
+
+function formatWatchDate(iso) {
+  const d = new Date(iso);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${mm}/${dd} ${hh}:${mi}`;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// ===== CHART =====
+function renderChart(s) {
+  const chart = (s.details && s.details.chart_60d) || [];
+  if (!chart.length || chart.length < 5) {
+    return `
+      <div class="modal-chart">
+        <div class="modal-chart-head">
+          <div class="modal-chart-head-left">
+            <div class="modal-chart-label">CHART</div>
+            <div class="modal-chart-title">60일 추이</div>
+          </div>
+        </div>
+        <div class="modal-chart-empty">차트 데이터 부족 (스캐너 업데이트 필요)</div>
+      </div>
+    `;
+  }
+
+  const W = 380, H = 200;
+  const PAD_L = 8, PAD_R = 52, PAD_T = 12, PAD_B = 22;
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+
+  const closes = chart.map(p => p.c);
+  const dates = chart.map(p => p.d);
+  const ma5Arr = chart.map(p => p.m5 != null ? p.m5 : null);
+  const ma20Arr = chart.map(p => p.m20 != null ? p.m20 : null);
+  const ma60Arr = chart.map(p => p.m60 != null ? p.m60 : null);
+  const N = closes.length;
+
+  const allVals = [...closes];
+  ma5Arr.forEach(v => v && allVals.push(v));
+  ma20Arr.forEach(v => v && allVals.push(v));
+  ma60Arr.forEach(v => v && allVals.push(v));
+  const yMax = Math.max(...allVals);
+  const yMin = Math.min(...allVals);
+  const yRange = yMax - yMin || 1;
+  const yPad = yRange * 0.06;
+
+  const xAt = (i) => PAD_L + (i / (N - 1)) * innerW;
+  const yAt = (v) => PAD_T + innerH - ((v - yMin + yPad) / (yRange + yPad * 2)) * innerH;
+
+  const buildPath = (arr) => {
+    let path = '';
+    let started = false;
+    arr.forEach((v, i) => {
+      if (v == null) return;
+      const x = xAt(i).toFixed(1);
+      const y = yAt(v).toFixed(1);
+      if (!started) { path += `M${x},${y}`; started = true; }
+      else path += `L${x},${y}`;
+    });
+    return path;
+  };
+
+  const pricePath = buildPath(closes);
+  const ma5Path = buildPath(ma5Arr);
+  const ma20Path = buildPath(ma20Arr);
+  const ma60Path = buildPath(ma60Arr);
+
+  const areaPath = pricePath + `L${xAt(N-1).toFixed(1)},${(PAD_T + innerH).toFixed(1)}L${xAt(0).toFixed(1)},${(PAD_T + innerH).toFixed(1)}Z`;
+
+  const high60 = (s.details && s.details.high_60d) || yMax;
+  const low60 = (s.details && s.details.low_60d) || yMin;
+  const highY = yAt(high60);
+  const lowY = yAt(low60);
+  const currentY = yAt(closes[N - 1]);
+
+  const yLabels = [
+    { v: high60, y: highY, color: '#FF5A5A' },
+    { v: closes[N - 1], y: currentY, color: '#5EEAD4', isCurrent: true },
+    { v: low60, y: lowY, color: '#4A9EFF' },
+  ];
+
+  const fmtD = (d) => `${d.slice(4,6)}/${d.slice(6,8)}`;
+  const xLabels = [
+    { i: 0, label: fmtD(dates[0]) },
+    { i: Math.floor(N / 2), label: fmtD(dates[Math.floor(N / 2)]) },
+    { i: N - 1, label: fmtD(dates[N - 1]) },
+  ];
+
+  // 관심 N차 진입 시점 매핑
+  const entries = getWatchEntries(s.code);
+  const watchMarkers = entries.map((e, idx) => {
+    const dt = new Date(e.ts);
+    const yyyymmdd = `${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}`;
+    let nearestIdx = -1;
+    let minDiff = Infinity;
+    dates.forEach((d, i) => {
+      const diff = Math.abs(parseInt(d) - parseInt(yyyymmdd));
+      if (diff < minDiff) { minDiff = diff; nearestIdx = i; }
+    });
+    if (nearestIdx === -1 || minDiff > 7) return null;
+    return { x: xAt(nearestIdx), y: yAt(e.price), nth: idx + 1, price: e.price };
+  }).filter(Boolean);
+
+  // 한국 컨벤션: 전일 대비 상승=빨강, 하락=파랑, 보합(0%)=청록
+  const ch = s.change_pct || 0;
+  let trendColor, glowColor;
+  if (ch > 0) {
+    trendColor = '#FF5A5A';
+    glowColor = 'rgba(255, 90, 90, 0.4)';
+  } else if (ch < 0) {
+    trendColor = '#4A9EFF';
+    glowColor = 'rgba(74, 158, 255, 0.4)';
+  } else {
+    trendColor = '#5EEAD4';
+    glowColor = 'rgba(94, 234, 212, 0.4)';
+  }
+  const gradId = `chartGrad_${s.code}`;
+
+  const watchSvg = watchMarkers.map(m => {
+    // 별 모양 (10각 별)
+    const cx = m.x, cy = m.y;
+    const r1 = 4, r2 = 1.8;
+    let pts = '';
+    for (let i = 0; i < 10; i++) {
+      const angle = (Math.PI * 2 * i) / 10 - Math.PI / 2;
+      const r = i % 2 === 0 ? r1 : r2;
+      const px = cx + Math.cos(angle) * r;
+      const py = cy + Math.sin(angle) * r;
+      pts += `${px.toFixed(1)},${py.toFixed(1)} `;
+    }
+    return `
+      <line class="chart-watch-star-line" x1="${cx.toFixed(1)}" y1="${PAD_T}" x2="${cx.toFixed(1)}" y2="${(PAD_T + innerH).toFixed(1)}"/>
+      <polygon class="chart-watch-star" points="${pts.trim()}"/>
+      <text class="chart-watch-nth" x="${(cx+6).toFixed(1)}" y="${(cy-2).toFixed(1)}">${m.nth}차</text>
+    `;
+  }).join('');
+
+  return `
+    <div class="modal-chart">
+      <div class="modal-chart-head">
+        <div class="modal-chart-head-left">
+          <div class="modal-chart-label">CHART</div>
+          <div class="modal-chart-title">60일 추이</div>
+        </div>
+        <div class="modal-chart-legend">
+          <span class="modal-chart-legend-item"><span class="modal-chart-legend-dot" style="background:#ECEFF4"></span>가격</span>
+          <span class="modal-chart-legend-item"><span class="modal-chart-legend-dot" style="background:#FCD34D"></span>MA5</span>
+          <span class="modal-chart-legend-item"><span class="modal-chart-legend-dot" style="background:#4A9EFF"></span>MA20</span>
+          <span class="modal-chart-legend-item"><span class="modal-chart-legend-dot" style="background:#A78BFA"></span>MA60</span>
+        </div>
+      </div>
+      <div class="modal-chart-svg-wrap">
+        <svg class="modal-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${trendColor}" stop-opacity="0.22"/>
+              <stop offset="100%" stop-color="${trendColor}" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+
+          <line class="chart-high-line" x1="${PAD_L}" y1="${highY.toFixed(1)}" x2="${(PAD_L + innerW).toFixed(1)}" y2="${highY.toFixed(1)}"/>
+          <line class="chart-low-line" x1="${PAD_L}" y1="${lowY.toFixed(1)}" x2="${(PAD_L + innerW).toFixed(1)}" y2="${lowY.toFixed(1)}"/>
+          <line class="chart-current-line" x1="${PAD_L}" y1="${currentY.toFixed(1)}" x2="${(PAD_L + innerW).toFixed(1)}" y2="${currentY.toFixed(1)}"/>
+
+          <path fill="url(#${gradId})" stroke="none" d="${areaPath}"/>
+
+          <path class="chart-line-ma60" d="${ma60Path}"/>
+          <path class="chart-line-ma20" d="${ma20Path}"/>
+          <path class="chart-line-ma5" d="${ma5Path}"/>
+          <path d="${pricePath}" fill="none" stroke="#ECEFF4" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" style="filter: drop-shadow(0 0 2px ${glowColor})"/>
+
+          ${watchSvg}
+
+          ${yLabels.map(l => `
+            <text class="chart-axis-text" x="${(PAD_L + innerW + 4).toFixed(1)}" y="${(l.y + 3).toFixed(1)}" fill="${l.color}" ${l.isCurrent ? 'font-weight="800"' : ''}>${fmt(Math.round(l.v))}</text>
+          `).join('')}
+
+          ${xLabels.map((l, i) => {
+            const x = xAt(l.i);
+            const anchor = i === 0 ? 'start' : i === xLabels.length - 1 ? 'end' : 'middle';
+            return `<text class="chart-axis-text" x="${x.toFixed(1)}" y="${(PAD_T + innerH + 14).toFixed(1)}" text-anchor="${anchor}">${l.label}</text>`;
+          }).join('')}
+        </svg>
+      </div>
+    </div>
+  `;
+}
+
+function renderWatchBox(s) {
+  const entries = getWatchEntries(s.code);
+  const nextNth = entries.length + 1;
+  const watching = entries.length > 0;
+
+  const entriesHtml = entries.map((e, i) => {
+    const n = i + 1;
+    const diff = ((s.price - e.price) / e.price * 100);
+    const diffCls = diff > 0.05 ? 'up' : diff < -0.05 ? 'down' : 'zero';
+    const diffStr = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+    const gradeCls = gradeClass(e.grade || 'D');
+    const memo = (e.memo || '').trim();
+    return `
+      <div class="watch-entry">
+        <button class="watch-entry-delete" data-watch-del="${i}" title="이 시점 삭제">×</button>
+        <div class="watch-entry-top">
+          <div class="watch-entry-tag">
+            <span class="watch-entry-nth">${nthLabel(n)}</span>
+            <span class="watch-entry-date">${formatWatchDate(e.ts)}</span>
+          </div>
+          <div class="watch-entry-meta">
+            <span class="watch-entry-price">₩${fmt(e.price)}</span>
+            <span class="watch-entry-diff ${diffCls}">${diffStr}</span>
+          </div>
+        </div>
+        <div class="watch-entry-score-row">
+          <span class="watch-entry-score-chip ${gradeCls}">${e.grade||'—'} ${e.score||'—'}</span>
+        </div>
+        <div class="watch-entry-memo ${memo ? '' : 'empty'}">
+          ${memo ? escapeHtml(memo).replace(/\n/g, '<br>') : '메모 없음'}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const emptyHint = !watching
+    ? `<div class="watch-empty-hint">아직 기록이 없습니다. 이 시점의 판단을 메모로 남겨보세요.</div>`
+    : '';
+
+  const placeholder = !watching
+    ? '예: 낙폭 깊고 거래량 회복 시작. 일단 절반만 진입 후 -3% 추가 매수 고려.'
+    : `예: ${nextNth}차 진입. 직전보다 ${entries[entries.length-1] ? (((s.price - entries[entries.length-1].price)/entries[entries.length-1].price*100).toFixed(1)+'%') : ''} 변동, 추가 매수 시점으로 판단.`;
+
+  return `
+    <div class="modal-watch">
+      <div class="modal-watch-head">
+        <div class="modal-watch-head-left">
+          <div class="modal-watch-label">MY</div>
+          <div class="modal-watch-title">관심 히스토리</div>
+        </div>
+        <div class="modal-watch-count">${entries.length}건 기록</div>
+      </div>
+
+      ${emptyHint}
+
+      ${entries.length > 0 ? `<div class="watch-entries">${entriesHtml}</div>` : ''}
+
+      <div class="watch-add">
+        <div class="watch-add-head">
+          <div class="watch-add-title">새 기록 추가</div>
+          <div class="watch-add-snapshot">
+            <span class="nth">${nthLabel(nextNth)}</span>
+            ₩${fmt(s.price)} · ${s.grade} ${s.score}
+          </div>
+        </div>
+        <textarea class="watch-add-textarea" id="watch-memo-input" placeholder="${placeholder.replace(/"/g,'&quot;')}" maxlength="500"></textarea>
+        <div class="watch-add-actions">
+          <button class="watch-add-btn ghost" id="watch-add-skip">메모 없이 추가</button>
+          <button class="watch-add-btn primary" id="watch-add-save">${nthLabel(nextNth)} 기록</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openModal(code) {
+  const s = allStocks.find(x => x.code === code);
+  if (!s) return;
+
+  const dt = s.details || {};
+  const bd = s.breakdown || {};
+  const gc = gradeClass(s.grade);
+  const watching = isWatching(code);
+  const dom = s.dominance || '중립';
+  const domClass = dom === '매수' ? 'buy' : dom === '매도' ? 'sell' : 'neutral';
+  const domIcon = dom === '매수' ? '▲' : dom === '매도' ? '▼' : '·';
+
+  const [t1, t2, sub] = generateTagline(s);
+  const ai = generateAINarrative(s);
+
+  const supplyDots = (key) => {
+    const daily = dt.supply_daily || [];
+    return daily.slice(0, 5).map(d => {
+      const val = d[key];
+      const cls = val > 0 ? 'buy' : (val < 0 ? 'sell' : 'zero');
+      return `<div class="supply-dot ${cls}"></div>`;
+    }).join('');
+  };
+
+  const maPct = (ma) => {
+    if (!ma) return { val: '—', cls: 'dim' };
+    const pct = ((ma - s.price) / s.price * 100);
+    return {
+      val: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`,
+      cls: pct > 0 ? 'down' : pct < 0 ? 'up' : 'dim'
+    };
+  };
+
+  const ma5p = maPct(dt.ma5);
+  const ma20p = maPct(dt.ma20);
+  const ma60p = maPct(dt.ma60);
+  const align = dt.ma_alignment || '혼조';
+
+  const candle = dt.candle_today || '양봉';
+  const candleSub = candleDesc[candle] || '';
+  const candle2D = dt.candle_2d;
+  const candle3D = dt.candle_3d;
+
+  let candleExtra = '';
+  if (candle3D && candle3DDesc[candle3D]) {
+    candleExtra = `<br><span class="h">${candle3D}</span> · ${candle3DDesc[candle3D]}`;
+  } else if (candle2D && candle2DDesc[candle2D]) {
+    candleExtra = `<br><span class="h">${candle2D}</span> · ${candle2DDesc[candle2D]}`;
+  }
+
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-name-row">
+        <div class="modal-name">${s.name}</div>
+        <div class="modal-dominance ${domClass}"><span>${domIcon}</span>${dom} 우세</div>
+      </div>
+      <div class="modal-meta">
+        <span class="modal-code">${s.code}</span>
+        <span class="modal-market">${s.market}</span>
+      </div>
+      <div class="modal-price-row">
+        <span class="modal-price">₩${fmt(s.price)}</span>
+        <span class="modal-change ${changeClass(s.change_pct)}">${fmtChange(s.change_pct)}</span>
+      </div>
+    </div>
+
+    <div class="modal-hero grade-${gc}">
+      <div class="modal-hero-info">
+        <div class="modal-hero-label">OVERALL SCORE</div>
+        <div class="modal-tagline">
+          ${t1} <span class="accent">${t2}</span>
+          <span class="modal-tagline-sub">${sub}</span>
+        </div>
+      </div>
+      <div class="modal-hero-display">
+        <div class="modal-hero-score">${s.score}</div>
+        <div class="modal-hero-badge ${gc}">${s.grade}</div>
+      </div>
+    </div>
+
+    ${renderChart(s)}
+
+    <div class="modal-ai">
+      <div class="modal-ai-head">
+        <div class="modal-ai-label">AI</div>
+        <div class="modal-ai-title">3~5일 보유 전략</div>
+      </div>
+      <div class="modal-ai-narrative">${ai.narrative}</div>
+      <div class="modal-ai-targets">
+        <div class="modal-ai-target stop">
+          <span class="modal-ai-target-label">손절가</span>
+          <span class="modal-ai-target-val">${fmt(ai.stopPrice)}원</span>
+        </div>
+        <div class="modal-ai-target target">
+          <span class="modal-ai-target-label">1차 목표가</span>
+          <span class="modal-ai-target-val">${fmt(ai.targetPrice)}원</span>
+        </div>
+      </div>
+    </div>
+
+    ${renderWatchBox(s)}
+
+    <div class="modal-analysis">
+
+      <div class="acard">
+        <div class="acard-head">
+          <div class="acard-title-row"><div class="acard-title">낙폭</div></div>
+          <div class="acard-score-row">
+            <div class="acard-score"><span class="num">${bd['낙폭']||0}</span><span class="max"> / 25</span></div>
+            <button class="info-btn" data-target="info-drop">?</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info-drop">
+          <div class="info-panel-inner">
+            <div class="info-panel-title">낙폭이란?</div>
+            최근 60일 동안 도달했던 장중 최고가 대비 현재가가 얼마나 떨어졌는지를 나타냅니다. 깊게 떨어졌을수록 반등 가능성이 높다는 역발상 전략의 핵심 지표입니다.
+            <ul class="info-panel-list">
+              <li><b>-10% 이상</b> · 가벼운 조정 (5점)</li>
+              <li><b>-15% 이상</b> · 의미있는 조정 (10점)</li>
+              <li><b>-20% 이상</b> · 큰 조정 (18점)</li>
+              <li><b>-25% 이상</b> · 깊은 과매도 (25점 만점)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="acard-bar"><div class="acard-bar-fill" style="width:${(bd['낙폭']||0)/25*100}%"></div></div>
+        <div class="acard-comment">
+          60일 장중 고점 <span class="p">${fmt(dt.high_60d||0)}원</span> 대비 <span class="h">${dt.drop_60d!=null?dt.drop_60d.toFixed(1):'—'}%</span> 조정 구간입니다.
+        </div>
+        <div class="acard-data">
+          <div class="acard-data-cell"><div class="acard-data-label">60일 고가</div><div class="acard-data-val">${fmt(dt.high_60d||0)}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">현재가</div><div class="acard-data-val brand">${fmt(s.price)}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">낙폭</div><div class="acard-data-val down">${dt.drop_60d!=null?dt.drop_60d.toFixed(1):'—'}%</div></div>
+        </div>
+      </div>
+
+      <div class="acard">
+        <div class="acard-head">
+          <div class="acard-title-row"><div class="acard-title">바닥다지기</div></div>
+          <div class="acard-score-row">
+            <div class="acard-score"><span class="num">${bd['바닥다지기']||0}</span><span class="max"> / 20</span></div>
+            <button class="info-btn" data-target="info-base">?</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info-base">
+          <div class="info-panel-inner">
+            <div class="info-panel-title">바닥다지기란?</div>
+            하락이 멈추고 매물대가 정리되는 단계입니다. 거래량이 회복되면서 가격 변동성이 줄어드는 패턴을 봅니다.
+            <ul class="info-panel-list">
+              <li><b>거래량 회복</b> · 5일 평균 ≥ 20일 평균</li>
+              <li><b>변동성 축소</b> · 일중 등락폭 감소</li>
+              <li><b>망치형 캔들</b> · 아래꼬리가 긴 양봉</li>
+            </ul>
+          </div>
+        </div>
+        <div class="acard-bar"><div class="acard-bar-fill" style="width:${(bd['바닥다지기']||0)/20*100}%"></div></div>
+        <div class="acard-comment">
+          거래량 5일/20일 비율 <span class="h">×${dt.volume_ratio_5d_vs_20d||'—'}</span>, 변동성 <span class="h">${(dt.std_shrink_pct||0)>0?'-':'+'}${Math.abs(dt.std_shrink_pct||0)}%</span> 축소.
+        </div>
+        <div class="acard-data">
+          <div class="acard-data-cell"><div class="acard-data-label">거래량비</div><div class="acard-data-val up">×${dt.volume_ratio_5d_vs_20d||'—'}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">변동성</div><div class="acard-data-val brand">${(dt.std_shrink_pct||0)>0?'-':'+'}${Math.abs(dt.std_shrink_pct||0)}%</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">캔들</div><div class="acard-data-val text">${candle}</div></div>
+        </div>
+      </div>
+
+      <div class="acard">
+        <div class="acard-head">
+          <div class="acard-title-row"><div class="acard-title">반등 시작</div></div>
+          <div class="acard-score-row">
+            <div class="acard-score"><span class="num">${bd['반등시작']||0}</span><span class="max"> / 25</span></div>
+            <button class="info-btn" data-target="info-rebound">?</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info-rebound">
+          <div class="info-panel-inner">
+            <div class="info-panel-title">반등 시작이란?</div>
+            바닥을 다진 후 실제 가격이 위로 움직이기 시작했는지 확인하는 단계입니다.
+            <ul class="info-panel-list">
+              <li><b>양봉</b> · 종가 > 시가 (8점)</li>
+              <li><b>거래량 급증</b> · 20일 평균 1.5배+ (5점)</li>
+              <li><b>MACD 양전환</b> · 모멘텀 상승 (5점)</li>
+            </ul>
+            <div class="info-panel-title" style="margin-top:10px;">캔들 패턴 가산점</div>
+            <ul class="info-panel-list">
+              <li><b>망치형</b> +4 · 아래꼬리 길고 위는 짧은 양봉. 장중 크게 떨어졌다가 매수세가 회복시킨 모양으로, 바닥에서 자주 나타나는 반전 신호입니다.</li>
+              <li><b>장대양봉</b> +6 · 시가부터 종가까지 큰 폭으로 오른 양봉. 매수세가 매도세를 강하게 압도한 신호입니다.</li>
+              <li><b>상승장악</b> +7 · 어제 음봉 전체를 덮어버리는 큰 양봉. 어제 하락분을 통째로 회복한 매수세 전환의 강한 증거입니다.</li>
+              <li><b>샛별</b> +10 · 음봉 → 도지 → 양봉의 3봉 패턴. 하락 후 바닥을 다지고 반등으로 전환하는 가장 신뢰도 높은 신호입니다.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="acard-bar"><div class="acard-bar-fill" style="width:${(bd['반등시작']||0)/25*100}%"></div></div>
+        <div class="acard-comment">
+          오늘 <span class="h">${candle}</span> · ${candleSub}${candleExtra}
+        </div>
+        <div class="acard-data">
+          <div class="acard-data-cell"><div class="acard-data-label">오늘</div><div class="acard-data-val text ${s.change_pct>0?'up':'down'}">${candle}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">거래량비</div><div class="acard-data-val up">×${dt.volume_today_vs_20d||'—'}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">변동률</div><div class="acard-data-val ${s.change_pct>0?'up':'down'}">${fmtChange(s.change_pct)}</div></div>
+        </div>
+      </div>
+
+      <div class="acard">
+        <div class="acard-head">
+          <div class="acard-title-row"><div class="acard-title">이동평균선</div></div>
+          <div class="acard-score-row">
+            <button class="info-btn" data-target="info-ma">?</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info-ma">
+          <div class="info-panel-inner">
+            <div class="info-panel-title">이동평균선이란?</div>
+            최근 N일의 평균 가격을 이은 선입니다. 추세 방향과 강도를 파악할 수 있습니다.
+            <ul class="info-panel-list">
+              <li><b>MA5</b> · 단기 추세 (5일 평균)</li>
+              <li><b>MA20</b> · 중기 추세 (20일 평균)</li>
+              <li><b>MA60</b> · 장기 추세 (60일 평균)</li>
+              <li><b>정배열</b> · MA5 > MA20 > MA60 (상승 추세)</li>
+              <li><b>역배열</b> · MA5 < MA20 < MA60 (하락 추세, 반등 노림)</li>
+            </ul>
+          </div>
+        </div>
+        <div style="padding:0 16px;">
+          <span class="ma-tag ${align}">${align}</span>
+        </div>
+        <div class="ma-stats">
+          <div class="ma-stat now">
+            <div class="ma-stat-label">현재가</div>
+            <div class="ma-stat-val">${fmt(s.price)}</div>
+            <div class="ma-stat-pct dim">기준</div>
+          </div>
+          <div class="ma-stat ma5">
+            <div class="ma-stat-label">MA5</div>
+            <div class="ma-stat-val">${fmt(dt.ma5||0)}</div>
+            <div class="ma-stat-pct ${ma5p.cls}">${ma5p.val}</div>
+          </div>
+          <div class="ma-stat ma20">
+            <div class="ma-stat-label">MA20</div>
+            <div class="ma-stat-val">${fmt(dt.ma20||0)}</div>
+            <div class="ma-stat-pct ${ma20p.cls}">${ma20p.val}</div>
+          </div>
+          <div class="ma-stat ma60">
+            <div class="ma-stat-label">MA60</div>
+            <div class="ma-stat-val">${fmt(dt.ma60||0)}</div>
+            <div class="ma-stat-pct ${ma60p.cls}">${ma60p.val}</div>
+          </div>
+        </div>
+        <div class="acard-comment">
+          MA 배열은 <span class="${align==='정배열'?'h':'n'}">${align}</span> 상태입니다.
+        </div>
+      </div>
+
+      <div class="acard">
+        <div class="acard-head">
+          <div class="acard-title-row"><div class="acard-title">이격도</div></div>
+          <div class="acard-score-row">
+            <div class="acard-score"><span class="num">${bd['이격도']||0}</span><span class="max"> / 15</span></div>
+            <button class="info-btn" data-target="info-disp">?</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info-disp">
+          <div class="info-panel-inner">
+            <div class="info-panel-title">이격도란?</div>
+            현재가가 이동평균선에서 얼마나 떨어져 있는지를 백분율로 나타냅니다. 평균에서 멀어질수록 회귀 가능성이 커집니다.
+            <ul class="info-panel-list">
+              <li><b>양수 (+)</b> · 평균선 위 (과매수)</li>
+              <li><b>음수 (-)</b> · 평균선 아래 (과매도, 반등 기회)</li>
+              <li><b>-10% 이하</b> · 강한 과매도</li>
+            </ul>
+          </div>
+        </div>
+        <div class="acard-bar"><div class="acard-bar-fill" style="width:${(bd['이격도']||0)/15*100}%"></div></div>
+        <div class="acard-comment">
+          20일선 대비 <span class="h">${dt.disparity_20d!=null?dt.disparity_20d.toFixed(1):'—'}%</span>, 60일선 대비 <span class="h">${dt.disparity_60d!=null?dt.disparity_60d.toFixed(1):'—'}%</span>.
+        </div>
+        <div class="acard-data">
+          <div class="acard-data-cell"><div class="acard-data-label">20일 이격</div><div class="acard-data-val ${dt.disparity_20d<0?'down':'up'}">${dt.disparity_20d!=null?dt.disparity_20d.toFixed(1):'—'}%</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">60일 이격</div><div class="acard-data-val ${dt.disparity_60d<0?'down':'up'}">${dt.disparity_60d!=null?dt.disparity_60d.toFixed(1):'—'}%</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">5일 회복</div><div class="acard-data-val ${dt.disp_recovery_5d>0?'up':'down'}">${(dt.disp_recovery_5d||0)>0?'+':''}${dt.disp_recovery_5d!=null?dt.disp_recovery_5d.toFixed(1):'—'}pp</div></div>
+        </div>
+      </div>
+
+      <div class="acard">
+        <div class="acard-head">
+          <div class="acard-title-row"><div class="acard-title">수급<span class="acard-subtitle">· 외국인 + 기관</span></div></div>
+          <div class="acard-score-row">
+            <div class="acard-score"><span class="num">${bd['수급']||0}</span><span class="max"> / 15</span></div>
+            <button class="info-btn" data-target="info-supply">?</button>
+          </div>
+        </div>
+        <div class="info-panel" id="info-supply">
+          <div class="info-panel-inner">
+            <div class="info-panel-title">수급이란?</div>
+            외국인과 기관 투자자가 해당 종목을 얼마나 사고 팔았는지입니다. 큰 자금의 흐름은 종목 방향성의 중요한 신호입니다.
+            <ul class="info-panel-list">
+              <li><b>외국인</b> · 글로벌 자금, 추세 형성</li>
+              <li><b>기관</b> · 연기금/자산운용사</li>
+              <li><b>5일 누적 매수</b> · 추세 전환 신호</li>
+              <li><b>개인은 제외</b> · 노이즈가 많아 신뢰도 낮음</li>
+            </ul>
+          </div>
+        </div>
+        <div class="acard-bar"><div class="acard-bar-fill" style="width:${(bd['수급']||0)/15*100}%"></div></div>
+
+        <div class="supply-top">
+          <div>
+            <div class="supply-top-label">외인+기관 5일 합</div>
+            <div class="supply-top-val ${(dt.combined_5d||0)>=0?'buy':'sell'}">${(dt.combined_5d||0)>=0?'+':''}${fmtBillion(dt.combined_5d||0)}억</div>
+          </div>
+          <div class="supply-dom ${domClass}">${domIcon} ${dom} 우세</div>
+        </div>
+
+        <div class="supply-lines">
+          <div class="supply-scale">
+            <span>5일전</span>
+            <span>오늘</span>
+          </div>
+          <div class="supply-line foreign">
+            <div class="supply-line-label">외국인</div>
+            <div class="supply-dots">${supplyDots('foreign')}</div>
+            <div class="supply-line-total ${(dt.foreign_5d_total||0)>=0?'buy':'sell'}">${(dt.foreign_5d_total||0)>=0?'+':''}${fmtBillion(dt.foreign_5d_total||0)}억</div>
+          </div>
+          <div class="supply-line inst">
+            <div class="supply-line-label">기관</div>
+            <div class="supply-dots">${supplyDots('inst')}</div>
+            <div class="supply-line-total ${(dt.inst_5d_total||0)>=0?'buy':'sell'}">${(dt.inst_5d_total||0)>=0?'+':''}${fmtBillion(dt.inst_5d_total||0)}억</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acard">
+        <div class="acard-head">
+          <div class="acard-title-row"><div class="acard-title">기타 지표</div></div>
+        </div>
+        <div class="acard-data" style="grid-template-columns: repeat(2, 1fr); margin-top: 6px;">
+          <div class="acard-data-cell"><div class="acard-data-label">오늘 / 5일평균</div><div class="acard-data-val up">×${dt.volume_today_vs_5d||'—'}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">오늘 / 20일평균</div><div class="acard-data-val up">×${dt.volume_today_vs_20d||'—'}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">시가총액</div><div class="acard-data-val">${dt.market_cap?Math.round(dt.market_cap/100000000)+'억':'—'}</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">ATR (14일)</div><div class="acard-data-val">${fmt(dt.atr_14||0)}원</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">PER</div><div class="acard-data-val">—</div></div>
+          <div class="acard-data-cell"><div class="acard-data-label">±15% 변동</div><div class="acard-data-val">${dt.big_moves_15pct||0}회</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-actions">
+      ${watching ? `<button class="btn btn-secondary" id="watch-clear-btn">★ 관심 전체 해제</button>` : ''}
+      <button class="btn btn-primary" id="modal-close">닫기</button>
+    </div>
+  `;
+
+  document.getElementById('modal-overlay').classList.add('show');
+
+  document.getElementById('modal-close').onclick = closeModal;
+
+  // 관심 전체 해제 버튼
+  const clearBtn = document.getElementById('watch-clear-btn');
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      if (confirm('이 종목의 관심 기록을 모두 삭제하시겠습니까?')) {
+        removeFromWatch(code);
+        showToast('관심 전체 해제');
+        renderAll();
+        openModal(code);
+      }
+    };
+  }
+
+  // 메모와 함께 N차 기록 추가
+  const memoInput = document.getElementById('watch-memo-input');
+  const saveBtn = document.getElementById('watch-add-save');
+  const skipBtn = document.getElementById('watch-add-skip');
+
+  const submitEntry = (withMemo) => {
+    const memo = withMemo ? (memoInput.value || '').trim() : '';
+    const nextN = getWatchEntries(code).length + 1;
+    addWatchEntry(code, memo);
+    showToast(`${nthLabel(nextN)} 기록 추가 · ₩${fmt(allStocks.find(x=>x.code===code).price)}`);
+    renderAll();
+    openModal(code);
+  };
+
+  if (saveBtn) saveBtn.onclick = () => submitEntry(true);
+  if (skipBtn) skipBtn.onclick = () => submitEntry(false);
+
+  // Enter 단축키 (Ctrl/Cmd+Enter로 저장)
+  if (memoInput) {
+    memoInput.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        submitEntry(true);
+      }
+    });
+  }
+
+  // 개별 기록 삭제
+  document.querySelectorAll('[data-watch-del]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.watchDel);
+      const entries = getWatchEntries(code);
+      const entry = entries[idx];
+      if (!entry) return;
+      const label = nthLabel(idx + 1);
+      if (confirm(`${label} 기록(${formatWatchDate(entry.ts)})을 삭제하시겠습니까?`)) {
+        removeWatchEntry(code, idx);
+        showToast(`${label} 기록 삭제`);
+        renderAll();
+        openModal(code);
+      }
+    });
+  });
+
+  document.querySelectorAll('.info-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const panel = document.getElementById(targetId);
+      const isOpen = panel.classList.contains('open');
+      document.querySelectorAll('.info-panel').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.info-btn').forEach(b => b.classList.remove('open'));
+      if (!isOpen) {
+        panel.classList.add('open');
+        btn.classList.add('open');
+      }
+    });
+  });
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-overlay') closeModal();
+});
+
+document.getElementById('modal-close-x').onclick = closeModal;
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.section;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === `section-${target}`));
+    if (target === 'search') setTimeout(() => document.getElementById('search-input').focus(), 50);
+  });
+});
+
+document.getElementById('filter-tabs').addEventListener('click', (e) => {
+  const tab = e.target.closest('.filter-tab');
+  if (!tab) return;
+  currentFilter = tab.dataset.filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t === tab));
+  renderSignal();
+});
+
+document.body.addEventListener('click', (e) => {
+  const card = e.target.closest('.stock-card');
+  if (card) openModal(card.dataset.code);
+});
+
+const searchInput = document.getElementById('search-input');
+const searchWrap = document.getElementById('search-wrap');
+searchInput.addEventListener('input', renderSearch);
+searchInput.addEventListener('focus', () => searchWrap.classList.add('focused'));
+searchInput.addEventListener('blur', () => searchWrap.classList.remove('focused'));
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+loadScores();
+setInterval(loadScores, 5 * 60 * 1000);
+
+</script>
+</body>
+</html>
