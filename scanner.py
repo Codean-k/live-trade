@@ -1,16 +1,20 @@
 """
-LIVE TRADE Scanner v3.5
+LIVE TRADE Scanner v3.6
 - 코스피200 + 코스닥150 (350종목)
 - 점수 만점 100점 (환산 없음)
 - 가중치: 낙폭25 + 바닥다지기20 + 반등시작25 + 이격도15 + 수급15 = 100
 - 페널티 별도 차감
 - v3.5: details.chart_60d 추가 (60일 close + MA5/20/60 시계열, PWA 차트용)
+- v3.6: 모든 시간을 KST (Asia/Seoul) 기준으로 통일 (GitHub Actions UTC 컨테이너에서도 정확)
 """
 
 import os
 import json
 import time
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+KST = ZoneInfo("Asia/Seoul")
 import pandas as pd
 from pykrx import stock
 
@@ -27,8 +31,8 @@ OUTPUT_FILE = "scores.json"
 
 def get_trading_dates(n_days=70):
     """최근 n일 영업일 리스트 (가장 최근이 마지막)"""
-    today = datetime.now().strftime("%Y%m%d")
-    start = (datetime.now() - timedelta(days=n_days + 20)).strftime("%Y%m%d")
+    today = datetime.now(KST).strftime("%Y%m%d")
+    start = (datetime.now(KST) - timedelta(days=n_days + 20)).strftime("%Y%m%d")
     dates = stock.get_previous_business_days(fromdate=start, todate=today)
     return [d.strftime("%Y%m%d") for d in dates][-n_days:]
 
@@ -165,8 +169,8 @@ def fetch_daily_supply(dates, markets):
 def analyze_stock(ticker, name, market, daily_supply):
     """단일 종목 분석"""
     try:
-        today = datetime.now().strftime("%Y%m%d")
-        start = (datetime.now() - timedelta(days=100)).strftime("%Y%m%d")
+        today = datetime.now(KST).strftime("%Y%m%d")
+        start = (datetime.now(KST) - timedelta(days=100)).strftime("%Y%m%d")
         df = stock.get_market_ohlcv(start, today, ticker)
 
         if df is None or df.empty or len(df) < 30:
@@ -452,7 +456,7 @@ def main():
     tickers = data["tickers"] if isinstance(data, dict) and "tickers" in data else data
 
     print(f"\n총 {len(tickers)}개 종목 스캔 시작")
-    print(f"시작 시간: {datetime.now().strftime('%H:%M:%S')}\n")
+    print(f"시작 시간: {datetime.now(KST).strftime('%H:%M:%S')}\n")
 
     print("[1/2] 일별 수급 데이터 수집 중...")
     dates = get_trading_dates(n_days=5)
@@ -473,7 +477,7 @@ def main():
     results.sort(key=lambda x: -x["score"])
 
     output = {
-        "updated": datetime.now().isoformat(),
+        "updated": datetime.now(KST).isoformat(),
         "version": "v3.4",
         "count": len(results),
         "results": results,
@@ -489,7 +493,7 @@ def main():
     print(f"완료: {len(results)}개 분석")
     print(f"등급 분포: {grade_counts}")
     print(f"저장: {OUTPUT_FILE}")
-    print(f"종료 시간: {datetime.now().strftime('%H:%M:%S')}")
+    print(f"종료 시간: {datetime.now(KST).strftime('%H:%M:%S')}")
 
 
 if __name__ == "__main__":
