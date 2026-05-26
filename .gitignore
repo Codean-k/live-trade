@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Python 가상환경/캐시 (이미 있을 수도 있음)
+__pycache__/
+*.pyc
