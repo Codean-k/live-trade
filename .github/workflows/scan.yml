@@ -7,6 +7,12 @@ on:
     # 평일 (월~금) 00:00 ~ 06:40 UTC, 30분 간격
     - cron: '0,30 0-6 * * 1-5'
     - cron: '40 6 * * 1-5'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scanner.py'
+      - '.github/workflows/scan.yml'
 
   # 2. 수동 실행 (테스트용)
   workflow_dispatch:
