@@ -1,9 +1,10 @@
 """
-LIVE TRADE Scanner v3.4
+LIVE TRADE Scanner v3.5
 - 코스피200 + 코스닥150 (350종목)
 - 점수 만점 100점 (환산 없음)
 - 가중치: 낙폭25 + 바닥다지기20 + 반등시작25 + 이격도15 + 수급15 = 100
 - 페널티 별도 차감
+- v3.5: details.chart_60d 추가 (60일 close + MA5/20/60 시계열, PWA 차트용)
 """
 
 import os
@@ -63,23 +64,17 @@ def detect_candle_pattern(df):
         upper_tail = high - max(open_p, close)
         lower_tail = min(open_p, close) - low
 
-        # 도지
         if body_ratio < 0.1:
             today_pattern = "도지"
-        # 망치형
         elif lower_tail > body * 2 and upper_tail < body * 0.5 and close > open_p:
             today_pattern = "망치형"
-        # 역망치
         elif upper_tail > body * 2 and lower_tail < body * 0.5 and close > open_p:
             today_pattern = "역망치"
-        # 장대양봉
         elif close > open_p and body_ratio > 0.7 and body > df["종가"].iloc[-20:].std() * 1.5:
             today_pattern = "장대양봉"
-        # 장대음봉
         elif close < open_p and body_ratio > 0.7 and body > df["종가"].iloc[-20:].std() * 1.5:
             today_pattern = "장대음봉"
 
-    # 2캔들 패턴
     two_day_pattern = None
     if (
         prev["종가"] < prev["시가"]
@@ -96,7 +91,6 @@ def detect_candle_pattern(df):
     ):
         two_day_pattern = "하락장악"
 
-    # 3캔들 패턴
     three_day_pattern = None
     if (
         prev2["종가"] < prev2["시가"]
@@ -171,7 +165,6 @@ def fetch_daily_supply(dates, markets):
 def analyze_stock(ticker, name, market, daily_supply):
     """단일 종목 분석"""
     try:
-        # 100일 OHLCV
         today = datetime.now().strftime("%Y%m%d")
         start = (datetime.now() - timedelta(days=100)).strftime("%Y%m%d")
         df = stock.get_market_ohlcv(start, today, ticker)
@@ -191,10 +184,9 @@ def analyze_stock(ticker, name, market, daily_supply):
         high_60d = float(df["고가"].iloc[-60:].max())
         low_60d = float(df["저가"].iloc[-60:].min())
 
-        # ===== 점수 (100점 만점) =====
         breakdown = {}
 
-        # ---- 1. 낙폭 (max 25) ----
+        # 1. 낙폭 (max 25)
         drop_60d = (price - high_60d) / high_60d * 100
         if drop_60d <= -25:
             drop_score = 25
@@ -212,7 +204,7 @@ def analyze_stock(ticker, name, market, daily_supply):
             drop_score = max(0, drop_score - 5)
         breakdown["낙폭"] = drop_score
 
-        # ---- 2. 바닥다지기 (max 20) ----
+        # 2. 바닥다지기 (max 20)
         vol_5d = df["거래량"].iloc[-5:].mean()
         vol_20d = df["거래량"].iloc[-20:].mean()
         vol_60d = df["거래량"].iloc[-60:].mean()
@@ -235,25 +227,22 @@ def analyze_stock(ticker, name, market, daily_supply):
             base_score += 4
         breakdown["바닥다지기"] = min(base_score, 20)
 
-        # ---- 3. 반등시작 (max 25, 캔들 가산 포함) ----
+        # 3. 반등시작 (max 25, 캔들 가산 포함)
         rebound_score = 0
         if change_pct > 0:
-            rebound_score += 8  # 양봉
+            rebound_score += 8
         vol_today_ratio = safe_div(last["거래량"], vol_20d, 1)
         if vol_today_ratio >= 1.5:
             rebound_score += 5
 
-        # MACD 양전환
         ema12 = df["종가"].ewm(span=12).mean()
         ema26 = df["종가"].ewm(span=26).mean()
         macd = ema12 - ema26
         if len(macd) >= 2 and macd.iloc[-1] > 0 and macd.iloc[-2] <= 0:
             rebound_score += 5
 
-        # 캔들 패턴
         candle_today, candle_2d, candle_3d = detect_candle_pattern(df)
 
-        # 캔들 가산
         if candle_today == "망치형":
             rebound_score += 4
         elif candle_today == "장대양봉":
@@ -265,7 +254,7 @@ def analyze_stock(ticker, name, market, daily_supply):
 
         breakdown["반등시작"] = min(rebound_score, 25)
 
-        # ---- 4. 이격도 (max 15) ----
+        # 4. 이격도 (max 15)
         disp_20d = (price - df["종가"].iloc[-20:].mean()) / df["종가"].iloc[-20:].mean() * 100
         disp_60d_val = disp_60d
 
@@ -277,7 +266,6 @@ def analyze_stock(ticker, name, market, daily_supply):
         if -15 <= disp_60d_val <= -5:
             disp_score += 5
 
-        # 이격도 회복폭
         try:
             ma20_5d_ago = df["종가"].iloc[-25:-5].mean()
             price_5d_ago = float(df["종가"].iloc[-6])
@@ -290,7 +278,7 @@ def analyze_stock(ticker, name, market, daily_supply):
 
         breakdown["이격도"] = min(disp_score, 15)
 
-        # ---- 5. 수급 (max 15) ----
+        # 5. 수급 (max 15)
         supply_data = daily_supply.get(ticker, [])
         foreign_5d_total = sum(d["foreign"] for d in supply_data) if supply_data else 0
         inst_5d_total = sum(d["inst"] for d in supply_data) if supply_data else 0
@@ -308,7 +296,7 @@ def analyze_stock(ticker, name, market, daily_supply):
             supply_score += 3
         breakdown["수급"] = min(supply_score, 15)
 
-        # ---- 매수/매도 우세 판정 ----
+        # 매수/매도 우세
         if combined_5d > 0 and (foreign_buy_days + inst_buy_days) >= 5:
             dominance = "매수"
         elif combined_5d < 0 and (foreign_buy_days + inst_buy_days) <= 3:
@@ -316,10 +304,8 @@ def analyze_stock(ticker, name, market, daily_supply):
         else:
             dominance = "중립"
 
-        # ---- 6. 페널티 ----
+        # 6. 페널티
         penalty = 0
-
-        # 작전주 단계화
         big_moves = sum(1 for r in df["등락률"].iloc[-60:].abs() if r >= 15)
         if big_moves >= 5:
             penalty -= 100
@@ -328,11 +314,9 @@ def analyze_stock(ticker, name, market, daily_supply):
         elif big_moves >= 2:
             penalty -= 30
 
-        # 거래량 10배 + 변동 10%
         if vol_today_ratio >= 10 and abs(change_pct) >= 10:
             penalty -= 100
 
-        # 20일 100%+ 급등
         try:
             price_20d_ago = float(df["종가"].iloc[-21])
             if (price - price_20d_ago) / price_20d_ago >= 1.0:
@@ -342,8 +326,8 @@ def analyze_stock(ticker, name, market, daily_supply):
 
         breakdown["페널티"] = penalty
 
-        # ===== 총점 / 등급 =====
-        raw_total = sum(breakdown.values())  # 페널티 포함
+        # 총점/등급
+        raw_total = sum(breakdown.values())
         total = max(0, min(100, raw_total))
 
         if penalty <= -100:
@@ -359,7 +343,7 @@ def analyze_stock(ticker, name, market, daily_supply):
         else:
             grade = "D"
 
-        # ===== 이동평균 =====
+        # 이동평균
         ma5 = int(df["종가"].iloc[-5:].mean())
         ma20 = int(df["종가"].iloc[-20:].mean())
         ma60 = int(df["종가"].iloc[-60:].mean())
@@ -371,7 +355,7 @@ def analyze_stock(ticker, name, market, daily_supply):
         else:
             alignment = "혼조"
 
-        # ===== ATR =====
+        # ATR
         df["tr"] = df.apply(
             lambda r: max(r["고가"] - r["저가"],
                           abs(r["고가"] - r["종가"]),
@@ -380,14 +364,13 @@ def analyze_stock(ticker, name, market, daily_supply):
         )
         atr = int(df["tr"].iloc[-14:].mean())
 
-        # ===== 시가총액 =====
+        # 시가총액
         try:
             cap_df = stock.get_market_cap(today, today, ticker)
             market_cap = int(cap_df["시가총액"].iloc[0]) if not cap_df.empty else 0
         except Exception:
             market_cap = 0
 
-        # ===== 결과 =====
         return {
             "code": ticker,
             "name": name,
@@ -431,6 +414,22 @@ def analyze_stock(ticker, name, market, daily_supply):
                 "foreign_buy_days": foreign_buy_days,
                 "inst_buy_days": inst_buy_days,
                 "supply_daily": supply_data,
+                "chart_60d": [
+                    {
+                        "d": d.strftime("%Y%m%d"),
+                        "c": int(c),
+                        "m5": int(m5) if pd.notna(m5) else None,
+                        "m20": int(m20) if pd.notna(m20) else None,
+                        "m60": int(m60) if pd.notna(m60) else None,
+                    }
+                    for d, c, m5, m20, m60 in zip(
+                        df.index[-60:],
+                        df["종가"].iloc[-60:],
+                        df["종가"].rolling(5).mean().iloc[-60:],
+                        df["종가"].rolling(20).mean().iloc[-60:],
+                        df["종가"].rolling(60).mean().iloc[-60:],
+                    )
+                ],
             },
         }
 
@@ -448,7 +447,6 @@ def main():
     print("LIVE TRADE Scanner v3.4 (100점 만점)")
     print("=" * 60)
 
-    # 종목 리스트 로드
     with open(TICKERS_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     tickers = data["tickers"] if isinstance(data, dict) and "tickers" in data else data
@@ -456,7 +454,6 @@ def main():
     print(f"\n총 {len(tickers)}개 종목 스캔 시작")
     print(f"시작 시간: {datetime.now().strftime('%H:%M:%S')}\n")
 
-    # 1단계: 일별 수급
     print("[1/2] 일별 수급 데이터 수집 중...")
     dates = get_trading_dates(n_days=5)
     print(f"  대상 영업일 (최근 5일): {dates}")
@@ -464,7 +461,6 @@ def main():
     daily_supply = fetch_daily_supply(dates, ["KOSPI", "KOSDAQ"])
     print(f"  수급 데이터 수집 완료: {len(daily_supply)}개 종목\n")
 
-    # 2단계: 종목별 분석
     print("[2/2] 종목별 분석 중...")
     results = []
     for i, t in enumerate(tickers):
@@ -474,10 +470,8 @@ def main():
         if (i + 1) % 50 == 0:
             print(f"  진행: {i + 1}/{len(tickers)} ({len(results)}개 분석 성공)")
 
-    # 점수순 정렬
     results.sort(key=lambda x: -x["score"])
 
-    # 저장
     output = {
         "updated": datetime.now().isoformat(),
         "version": "v3.4",
@@ -487,7 +481,6 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    # 통계
     grade_counts = {}
     for r in results:
         grade_counts[r["grade"]] = grade_counts.get(r["grade"], 0) + 1
