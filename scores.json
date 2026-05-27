@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-28T01:08:21.913844+09:00",
+  "updated": "2026-05-28T01:34:12.979660+09:00",
   "version": "v3.7.2",
   "count": 350,
   "market_context": {
@@ -270,7 +270,7 @@
     "candidates": {
       "criteria": {
         "trend": "거래대금 Top 30 + 외인/기관 5일 매수 + 매수 우세 + 경고 제외",
-        "drop": "점수 50+ + 경고 제외",
+        "drop": "점수 60+ (S/A 등급) + 경고 제외",
         "sweet": "두 관점 교집합"
       },
       "trend": {
@@ -288,6 +288,12 @@
             "drop_60d": -4.9,
             "combined_5d": 1540652556000,
             "today_value_won": 16258096153000,
+            "foreign_5d_total": -2578434216260,
+            "inst_5d_total": 4119086772260,
+            "foreign_buy_days": 0,
+            "inst_buy_days": 5,
+            "volume_today_vs_20d": 1.31,
+            "volume_today_vs_60d": 1.49,
             "volume_rank": 1
           },
           {
@@ -302,6 +308,12 @@
             "drop_60d": -5.0,
             "combined_5d": 1385069251750,
             "today_value_won": 10268365001000,
+            "foreign_5d_total": -1002158630710,
+            "inst_5d_total": 2387227882460,
+            "foreign_buy_days": 2,
+            "inst_buy_days": 4,
+            "volume_today_vs_20d": 1.05,
+            "volume_today_vs_60d": 1.1,
             "volume_rank": 2
           },
           {
@@ -316,6 +328,12 @@
             "drop_60d": -4.6,
             "combined_5d": 201170616500,
             "today_value_won": 1431139908000,
+            "foreign_5d_total": -103361458500,
+            "inst_5d_total": 304532075000,
+            "foreign_buy_days": 2,
+            "inst_buy_days": 5,
+            "volume_today_vs_20d": 1.14,
+            "volume_today_vs_60d": 1.55,
             "volume_rank": 4
           },
           {
@@ -330,6 +348,12 @@
             "drop_60d": 0.0,
             "combined_5d": 16041020700,
             "today_value_won": 818570573500,
+            "foreign_5d_total": -44474157150,
+            "inst_5d_total": 60515177850,
+            "foreign_buy_days": 3,
+            "inst_buy_days": 4,
+            "volume_today_vs_20d": 4.81,
+            "volume_today_vs_60d": 7.65,
             "volume_rank": 8
           },
           {
@@ -344,6 +368,12 @@
             "drop_60d": -12.9,
             "combined_5d": 74356454000,
             "today_value_won": 503949600000,
+            "foreign_5d_total": 87264750000,
+            "inst_5d_total": -12908296000,
+            "foreign_buy_days": 3,
+            "inst_buy_days": 2,
+            "volume_today_vs_20d": 1.01,
+            "volume_today_vs_60d": 0.97,
             "volume_rank": 11
           },
           {
@@ -358,6 +388,12 @@
             "drop_60d": -0.4,
             "combined_5d": 53762026000,
             "today_value_won": 492297390000,
+            "foreign_5d_total": -7962719500,
+            "inst_5d_total": 61724745500,
+            "foreign_buy_days": 3,
+            "inst_buy_days": 5,
+            "volume_today_vs_20d": 1.73,
+            "volume_today_vs_60d": 3.17,
             "volume_rank": 12
           },
           {
@@ -372,6 +408,12 @@
             "drop_60d": -11.1,
             "combined_5d": 28204981493,
             "today_value_won": 474158831520,
+            "foreign_5d_total": 31832256865,
+            "inst_5d_total": -3627275372,
+            "foreign_buy_days": 4,
+            "inst_buy_days": 3,
+            "volume_today_vs_20d": 1.99,
+            "volume_today_vs_60d": 3.95,
             "volume_rank": 14
           },
           {
@@ -386,6 +428,12 @@
             "drop_60d": -2.7,
             "combined_5d": 95091545500,
             "today_value_won": 409936560000,
+            "foreign_5d_total": -88541306000,
+            "inst_5d_total": 183632851500,
+            "foreign_buy_days": 2,
+            "inst_buy_days": 4,
+            "volume_today_vs_20d": 0.97,
+            "volume_today_vs_60d": 1.2,
             "volume_rank": 16
           },
           {
@@ -400,6 +448,12 @@
             "drop_60d": -12.9,
             "combined_5d": 228614228250,
             "today_value_won": 394548100500,
+            "foreign_5d_total": 177854857950,
+            "inst_5d_total": 50759370300,
+            "foreign_buy_days": 4,
+            "inst_buy_days": 4,
+            "volume_today_vs_20d": 1.56,
+            "volume_today_vs_60d": 1.55,
             "volume_rank": 17
           },
           {
@@ -414,6 +468,12 @@
             "drop_60d": -5.6,
             "combined_5d": 155112159750,
             "today_value_won": 366652838500,
+            "foreign_5d_total": 47663928000,
+            "inst_5d_total": 107448231750,
+            "foreign_buy_days": 2,
+            "inst_buy_days": 4,
+            "volume_today_vs_20d": 1.69,
+            "volume_today_vs_60d": 2.3,
             "volume_rank": 19
           },
           {
@@ -428,6 +488,12 @@
             "drop_60d": 0.0,
             "combined_5d": 48752114900,
             "today_value_won": 344372438800,
+            "foreign_5d_total": -5341994650,
+            "inst_5d_total": 54094109550,
+            "foreign_buy_days": 2,
+            "inst_buy_days": 3,
+            "volume_today_vs_20d": 5.79,
+            "volume_today_vs_60d": 5.96,
             "volume_rank": 22
           },
           {
@@ -442,12 +508,19 @@
             "drop_60d": -24.6,
             "combined_5d": 140135507200,
             "today_value_won": 310425814100,
+            "foreign_5d_total": 125466770700,
+            "inst_5d_total": 14668736500,
+            "foreign_buy_days": 5,
+            "inst_buy_days": 3,
+            "volume_today_vs_20d": 1.36,
+            "volume_today_vs_60d": 1.3,
             "volume_rank": 23
           }
-        ]
+        ],
+        "diagnosis": "오늘 시장 자금이 12개 주도주로 유입. 이 종목들에 외인+기관이 5일 평균 +3,306억 순매수. 이 중 3개는 15%+ 급등 — 모멘텀 폭발 구간. 주의: 우리 점수 시스템에선 A등급(60+) 0개 — 거래대금/수급은 시장 인정이지만 낙폭+바닥다지기 신호는 아직 부족. 상위 3종목이 87% 차지 — 자금 쏠림 극심. '주도주 안에서 낙폭' 패턴 — 하락한 삼성SDI, 에코프로 검토."
       },
       "drop": {
-        "count": 42,
+        "count": 7,
         "items": [
           {
             "code": "009970",
@@ -460,7 +533,13 @@
             "dominance": "매수",
             "drop_60d": -25.0,
             "combined_5d": 1452473800,
-            "today_value_won": 4584958000
+            "today_value_won": 4584958000,
+            "foreign_5d_total": -703738450,
+            "inst_5d_total": 2156212250,
+            "foreign_buy_days": 2,
+            "inst_buy_days": 4,
+            "volume_today_vs_20d": 0.96,
+            "volume_today_vs_60d": 1.2
           },
           {
             "code": "067160",
@@ -473,7 +552,13 @@
             "dominance": "중립",
             "drop_60d": -29.1,
             "combined_5d": 1185665350,
-            "today_value_won": 5210360400
+            "today_value_won": 5210360400,
+            "foreign_5d_total": 1335158950,
+            "inst_5d_total": -149493600,
+            "foreign_buy_days": 3,
+            "inst_buy_days": 1,
+            "volume_today_vs_20d": 1.47,
+            "volume_today_vs_60d": 1.74
           },
           {
             "code": "042000",
@@ -486,7 +571,13 @@
             "dominance": "매수",
             "drop_60d": -39.7,
             "combined_5d": 557262155,
-            "today_value_won": 3827840000
+            "today_value_won": 3827840000,
+            "foreign_5d_total": 367076205,
+            "inst_5d_total": 190185950,
+            "foreign_buy_days": 4,
+            "inst_buy_days": 3,
+            "volume_today_vs_20d": 1.38,
+            "volume_today_vs_60d": 1.75
           },
           {
             "code": "008930",
@@ -499,7 +590,13 @@
             "dominance": "중립",
             "drop_60d": -30.4,
             "combined_5d": 479050600,
-            "today_value_won": 3739983500
+            "today_value_won": 3739983500,
+            "foreign_5d_total": 1304508275,
+            "inst_5d_total": -825457675,
+            "foreign_buy_days": 3,
+            "inst_buy_days": 1,
+            "volume_today_vs_20d": 0.9,
+            "volume_today_vs_60d": 0.75
           },
           {
             "code": "213420",
@@ -512,7 +609,13 @@
             "dominance": "중립",
             "drop_60d": -25.8,
             "combined_5d": -7760196700,
-            "today_value_won": 16004905000
+            "today_value_won": 16004905000,
+            "foreign_5d_total": 543411825,
+            "inst_5d_total": -8303608525,
+            "foreign_buy_days": 4,
+            "inst_buy_days": 1,
+            "volume_today_vs_20d": 1.84,
+            "volume_today_vs_60d": 1.47
           },
           {
             "code": "241710",
@@ -525,7 +628,13 @@
             "dominance": "중립",
             "drop_60d": -26.6,
             "combined_5d": -6389435950,
-            "today_value_won": 10001758200
+            "today_value_won": 10001758200,
+            "foreign_5d_total": 4096011600,
+            "inst_5d_total": -10485447550,
+            "foreign_buy_days": 5,
+            "inst_buy_days": 0,
+            "volume_today_vs_20d": 1.69,
+            "volume_today_vs_60d": 1.66
           },
           {
             "code": "460930",
@@ -538,462 +647,13 @@
             "dominance": "매수",
             "drop_60d": -26.5,
             "combined_5d": 638837910,
-            "today_value_won": 3728539920
-          },
-          {
-            "code": "010950",
-            "name": "S-Oil",
-            "market": "KOSPI200",
-            "price": 108100,
-            "change_pct": -1.82,
-            "score": 58,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -39.0,
-            "combined_5d": 2875189800,
-            "today_value_won": 39488605700
-          },
-          {
-            "code": "377300",
-            "name": "카카오페이",
-            "market": "KOSPI200",
-            "price": 46750,
-            "change_pct": -3.71,
-            "score": 58,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -33.5,
-            "combined_5d": 819969675,
-            "today_value_won": 13583025500
-          },
-          {
-            "code": "003030",
-            "name": "세아제강지주",
-            "market": "KOSPI200",
-            "price": 169300,
-            "change_pct": -5.52,
-            "score": 58,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -34.9,
-            "combined_5d": 193689200,
-            "today_value_won": 3412749400
-          },
-          {
-            "code": "290650",
-            "name": "엘앤씨바이오",
-            "market": "KOSDAQ150",
-            "price": 79000,
-            "change_pct": 8.97,
-            "score": 58,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -20.1,
-            "combined_5d": 25930609750,
-            "today_value_won": 49376580000
-          },
-          {
-            "code": "194480",
-            "name": "데브시스터즈",
-            "market": "KOSDAQ150",
-            "price": 16910,
-            "change_pct": -2.76,
-            "score": 58,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -61.9,
-            "combined_5d": 64092495,
-            "today_value_won": 943053790
-          },
-          {
-            "code": "0126Z0",
-            "name": "삼성에피스홀딩스",
-            "market": "KOSPI200",
-            "price": 484000,
-            "change_pct": -1.22,
-            "score": 57,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -29.0,
-            "combined_5d": 8972776000,
-            "today_value_won": 26995584000
-          },
-          {
-            "code": "003240",
-            "name": "태광산업",
-            "market": "KOSPI200",
-            "price": 1001000,
-            "change_pct": -1.77,
-            "score": 57,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -35.3,
-            "combined_5d": 285145000,
-            "today_value_won": 1831830000
-          },
-          {
-            "code": "028300",
-            "name": "HLB",
-            "market": "KOSDAQ150",
-            "price": 51000,
-            "change_pct": -2.67,
-            "score": 57,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -25.5,
-            "combined_5d": 740543575,
-            "today_value_won": 33229152000
-          },
-          {
-            "code": "065350",
-            "name": "신성델타테크",
-            "market": "KOSDAQ150",
-            "price": 46250,
-            "change_pct": -4.24,
-            "score": 57,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -38.1,
-            "combined_5d": 251973100,
-            "today_value_won": 7059785000
-          },
-          {
-            "code": "069620",
-            "name": "대웅제약",
-            "market": "KOSPI200",
-            "price": 134700,
-            "change_pct": 0.0,
-            "score": 56,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -27.7,
-            "combined_5d": -4199298100,
-            "today_value_won": 5115501900
-          },
-          {
-            "code": "068760",
-            "name": "셀트리온제약",
-            "market": "KOSDAQ150",
-            "price": 48950,
-            "change_pct": -2.49,
-            "score": 56,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -32.8,
-            "combined_5d": 45942200,
-            "today_value_won": 4965439050
-          },
-          {
-            "code": "450080",
-            "name": "에코프로머티",
-            "market": "KOSPI200",
-            "price": 64100,
-            "change_pct": -5.04,
-            "score": 55,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -27.8,
-            "combined_5d": 3662707700,
-            "today_value_won": 40998488200
-          },
-          {
-            "code": "215000",
-            "name": "골프존",
-            "market": "KOSDAQ150",
-            "price": 42750,
-            "change_pct": -3.06,
-            "score": 55,
-            "grade": "B",
-            "dominance": "매도",
-            "drop_60d": -25.1,
-            "combined_5d": -1798919875,
-            "today_value_won": 1068664500
-          },
-          {
-            "code": "005830",
-            "name": "DB손해보험",
-            "market": "KOSPI200",
-            "price": 144500,
-            "change_pct": -2.76,
-            "score": 54,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -30.7,
-            "combined_5d": -21890417900,
-            "today_value_won": 41027451500
-          },
-          {
-            "code": "101730",
-            "name": "위메이드맥스",
-            "market": "KOSDAQ150",
-            "price": 4280,
-            "change_pct": -3.39,
-            "score": 54,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -43.2,
-            "combined_5d": 23953703,
-            "today_value_won": 359669800
-          },
-          {
-            "code": "352820",
-            "name": "하이브",
-            "market": "KOSPI200",
-            "price": 233000,
-            "change_pct": -1.27,
-            "score": 53,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -41.5,
-            "combined_5d": 7541980000,
-            "today_value_won": 74694208000
-          },
-          {
-            "code": "103140",
-            "name": "풍산",
-            "market": "KOSPI200",
-            "price": 83800,
-            "change_pct": -4.66,
-            "score": 53,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -47.4,
-            "combined_5d": 3418924400,
-            "today_value_won": 12424355600
-          },
-          {
-            "code": "041190",
-            "name": "우리기술투자",
-            "market": "KOSDAQ150",
-            "price": 5890,
-            "change_pct": -5.76,
-            "score": 53,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -26.3,
-            "combined_5d": 630293965,
-            "today_value_won": 6082638340
-          },
-          {
-            "code": "052690",
-            "name": "한전기술",
-            "market": "KOSPI200",
-            "price": 141800,
-            "change_pct": -2.81,
-            "score": 52,
-            "grade": "B",
-            "dominance": "매도",
-            "drop_60d": -28.4,
-            "combined_5d": -6421840400,
-            "today_value_won": 14939339000
-          },
-          {
-            "code": "399720",
-            "name": "가온칩스",
-            "market": "KOSDAQ150",
-            "price": 59100,
-            "change_pct": -6.49,
-            "score": 52,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -29.0,
-            "combined_5d": -2517675900,
-            "today_value_won": 7667574900
-          },
-          {
-            "code": "053030",
-            "name": "바이넥스",
-            "market": "KOSDAQ150",
-            "price": 9220,
-            "change_pct": -5.34,
-            "score": 52,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -43.3,
-            "combined_5d": 507614320,
-            "today_value_won": 1951274700
-          },
-          {
-            "code": "139480",
-            "name": "이마트",
-            "market": "KOSPI200",
-            "price": 88100,
-            "change_pct": -4.96,
-            "score": 51,
-            "grade": "B",
-            "dominance": "매도",
-            "drop_60d": -25.8,
-            "combined_5d": -19605920150,
-            "today_value_won": 26864068700
-          },
-          {
-            "code": "001430",
-            "name": "세아베스틸지주",
-            "market": "KOSPI200",
-            "price": 61100,
-            "change_pct": -5.86,
-            "score": 51,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -27.2,
-            "combined_5d": -9108913400,
-            "today_value_won": 17014517000
-          },
-          {
-            "code": "036620",
-            "name": "감성코퍼레이션",
-            "market": "KOSDAQ150",
-            "price": 4950,
-            "change_pct": -2.94,
-            "score": 51,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -29.9,
-            "combined_5d": -1969255981,
-            "today_value_won": 4589347950
-          },
-          {
-            "code": "047050",
-            "name": "포스코인터내셔널",
-            "market": "KOSPI200",
-            "price": 65600,
-            "change_pct": -3.95,
-            "score": 50,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -28.1,
-            "combined_5d": -38718295300,
-            "today_value_won": 41025387200
-          },
-          {
-            "code": "326030",
-            "name": "SK바이오팜",
-            "market": "KOSPI200",
-            "price": 94700,
-            "change_pct": -2.07,
-            "score": 50,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -21.0,
-            "combined_5d": 8027465500,
-            "today_value_won": 22214726000
-          },
-          {
-            "code": "090430",
-            "name": "아모레퍼시픽",
-            "market": "KOSPI200",
-            "price": 116600,
-            "change_pct": -1.77,
-            "score": 50,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -25.8,
-            "combined_5d": -32002660700,
-            "today_value_won": 21370797800
-          },
-          {
-            "code": "029780",
-            "name": "삼성카드",
-            "market": "KOSPI200",
-            "price": 46850,
-            "change_pct": -1.68,
-            "score": 50,
-            "grade": "B",
-            "dominance": "매도",
-            "drop_60d": -26.7,
-            "combined_5d": -9994683050,
-            "today_value_won": 6494721800
-          },
-          {
-            "code": "383220",
-            "name": "F&F",
-            "market": "KOSPI200",
-            "price": 74400,
-            "change_pct": 1.22,
-            "score": 50,
-            "grade": "B",
-            "dominance": "매수",
-            "drop_60d": -15.6,
-            "combined_5d": 2786461900,
-            "today_value_won": 8309140800
-          },
-          {
-            "code": "081660",
-            "name": "미스토홀딩스",
-            "market": "KOSPI200",
-            "price": 38000,
-            "change_pct": -3.43,
-            "score": 50,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -25.6,
-            "combined_5d": -874113375,
-            "today_value_won": 5430504000
-          },
-          {
-            "code": "257720",
-            "name": "실리콘투",
-            "market": "KOSDAQ150",
-            "price": 37250,
-            "change_pct": -2.1,
-            "score": 50,
-            "grade": "B",
-            "dominance": "매도",
-            "drop_60d": -26.2,
-            "combined_5d": -22493254625,
-            "today_value_won": 32468478250
-          },
-          {
-            "code": "041510",
-            "name": "에스엠",
-            "market": "KOSDAQ150",
-            "price": 83600,
-            "change_pct": -3.24,
-            "score": 50,
-            "grade": "B",
-            "dominance": "매도",
-            "drop_60d": -29.0,
-            "combined_5d": -5000866700,
-            "today_value_won": 7749385600
-          },
-          {
-            "code": "293490",
-            "name": "카카오게임즈",
-            "market": "KOSDAQ150",
-            "price": 9780,
-            "change_pct": -2.78,
-            "score": 50,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -40.6,
-            "combined_5d": -281857460,
-            "today_value_won": 2113154820
-          },
-          {
-            "code": "032190",
-            "name": "다우데이타",
-            "market": "KOSDAQ150",
-            "price": 20450,
-            "change_pct": -6.19,
-            "score": 50,
-            "grade": "B",
-            "dominance": "중립",
-            "drop_60d": -25.4,
-            "combined_5d": 409253585,
-            "today_value_won": 2982468900
-          },
-          {
-            "code": "253450",
-            "name": "스튜디오드래곤",
-            "market": "KOSDAQ150",
-            "price": 26950,
-            "change_pct": -2.18,
-            "score": 50,
-            "grade": "B",
-            "dominance": "매도",
-            "drop_60d": -40.5,
-            "combined_5d": -2152783900,
-            "today_value_won": 2660423150
+            "today_value_won": 3728539920,
+            "foreign_5d_total": 586573240,
+            "inst_5d_total": 52264670,
+            "foreign_buy_days": 3,
+            "inst_buy_days": 2,
+            "volume_today_vs_20d": 0.84,
+            "volume_today_vs_60d": 0.43
           }
         ]
       },
@@ -1002,7 +662,7 @@
         "items": []
       }
     },
-    "calculated_at": "2026-05-28T01:08:21.913829+09:00"
+    "calculated_at": "2026-05-28T01:34:12.979660+09:00"
   },
   "results": [
     {
