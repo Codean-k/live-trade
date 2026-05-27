@@ -317,6 +317,13 @@ def _slim_candidate(r, today_value_won=None, rank=None):
         "drop_60d": dt.get("drop_60d"),
         "combined_5d": dt.get("combined_5d", 0),
         "today_value_won": dt.get("today_value_won", 0),
+        # v5.10: 관점 1 종목별 분석용 필드
+        "foreign_5d_total": dt.get("foreign_5d_total", 0),
+        "inst_5d_total": dt.get("inst_5d_total", 0),
+        "foreign_buy_days": dt.get("foreign_buy_days", 0),
+        "inst_buy_days": dt.get("inst_buy_days", 0),
+        "volume_today_vs_20d": dt.get("volume_today_vs_20d", 1),
+        "volume_today_vs_60d": dt.get("volume_today_vs_60d", 1),
     }
     if today_value_won is not None:
         out["today_value_won"] = int(today_value_won)
@@ -325,17 +332,109 @@ def _slim_candidate(r, today_value_won=None, rank=None):
     return out
 
 
+def _diagnose_trend(trend_items, score_dist, breadth):
+    """
+    관점 1 (시장 흐름) 후보 12개 전체를 한 문단 진단.
+    "그래서 이게 왜 의미 있어?"에 답함.
+    """
+    if not trend_items:
+        return "조건 충족 종목 없음. 양극화 장 또는 약세 추세 — 시장 자금이 우리 350종목 안 주도주로 안 들어옴."
+
+    n = len(trend_items)
+
+    # 자금 강도 집계 (외인+기관 5일 합계)
+    total_combined = sum(it.get("combined_5d", 0) for it in trend_items)
+    avg_combined = total_combined / n if n > 0 else 0
+
+    # 거래량 폭발 종목 수 (20일 평균 대비 2배+)
+    vol_explode = sum(1 for it in trend_items if it.get("volume_today_vs_20d", 1) >= 2.0)
+
+    # 상승/하락 분포
+    up_count = sum(1 for it in trend_items if it.get("change_pct", 0) > 0.5)
+    down_count = sum(1 for it in trend_items if it.get("change_pct", 0) < -0.5)
+
+    # 상한가/급등 (15%+)
+    surge_count = sum(1 for it in trend_items if it.get("change_pct", 0) >= 15)
+
+    # 점수 분포 — A등급 이상 몇 개?
+    a_or_above = sum(1 for it in trend_items if it.get("grade") in ("S", "A"))
+
+    # 거래대금 집중도 — Top 3 이 차지 비중
+    sorted_by_vol = sorted(trend_items, key=lambda x: -x.get("today_value_won", 0))
+    top3_value = sum(it.get("today_value_won", 0) for it in sorted_by_vol[:3])
+    total_value = sum(it.get("today_value_won", 0) for it in trend_items)
+    top3_pct = (top3_value / total_value * 100) if total_value > 0 else 0
+
+    # 진단 문장 조립
+    parts = []
+    parts.append(f"오늘 시장 자금이 {n}개 주도주로 유입.")
+
+    if avg_combined > 0:
+        parts.append(f"이 종목들에 외인+기관이 5일 평균 {_format_han(int(avg_combined))} 순매수.")
+
+    # 흐름의 성격
+    if surge_count >= 3:
+        parts.append(f"이 중 {surge_count}개는 15%+ 급등 — 모멘텀 폭발 구간.")
+    elif up_count >= n * 0.7:
+        parts.append(f"{up_count}개가 상승 ({int(up_count/n*100)}%) — 동반 강세.")
+    elif down_count >= n * 0.4:
+        parts.append(f"{down_count}개는 하락 ({int(down_count/n*100)}%) — 주도주 안에서도 차별화 진행.")
+
+    # 거래량 폭발
+    if vol_explode >= n * 0.5:
+        parts.append(f"{vol_explode}개가 평소 거래량의 2배+ — 시장 관심 집중.")
+
+    # 점수와의 관계
+    if a_or_above == 0:
+        parts.append(
+            "주의: 우리 점수 시스템에선 A등급(60+) 0개 — "
+            "거래대금/수급은 시장 인정이지만 낙폭+바닥다지기 신호는 아직 부족."
+        )
+    elif a_or_above >= 3:
+        parts.append(
+            f"A등급 이상 {a_or_above}개 포함 — 자금+점수 동시 충족, SWEET SPOT 후보 풍부."
+        )
+
+    # 집중도
+    if top3_pct >= 70:
+        parts.append(f"상위 3종목이 {top3_pct:.0f}% 차지 — 자금 쏠림 극심.")
+
+    # 패턴 가이드 (Dean 매매 패턴)
+    if down_count >= 2:
+        down_names = [it["name"] for it in trend_items if it.get("change_pct", 0) < -0.5][:3]
+        if down_names:
+            parts.append(
+                f"'주도주 안에서 낙폭' 패턴 — 하락한 {', '.join(down_names)} 검토."
+            )
+
+    return " ".join(parts)
+
+
+def _format_han(value):
+    """원 단위 정수 → 한국식 억/조 표기 (Python 헬퍼, JS의 mcFormatHan과 동일 로직)."""
+    if value is None:
+        return "—"
+    abs_v = abs(value)
+    sign = "+" if value > 0 else ("-" if value < 0 else "")
+    if abs_v >= 1e12:
+        return f"{sign}{abs_v / 1e12:.1f}조"
+    if abs_v >= 1e8:
+        return f"{sign}{int(round(abs_v / 1e8)):,}억"
+    if abs_v >= 1e4:
+        return f"{sign}{int(round(abs_v / 1e4)):,}만"
+    return f"{sign}{int(round(abs_v)):,}"
+
+
 def calculate_candidates(results):
     """
     Today's Candidates 산출.
-    기준 (Dean 확정, 2026-05-28):
+    기준 (Dean 확정, 2026-05-28 v3 + v5.10):
       관점 1: 거래대금 Top 30 + combined_5d > 0 + dominance == "매수" + grade != "경고"
-      관점 2: score >= 50 + grade != "경고"
+      관점 2: score >= 60 (S+A만) + grade != "경고"  [v5.10: 50 → 60 변경]
       SWEET : 위 둘의 교집합
     노출: 전부 (상한 없음)
     """
     # ===== 관점 1: 시장 흐름 (주도주) =====
-    # 오늘 거래대금 내림차순, Top 30
     valid_for_volume = [
         (r, (r.get("details") or {}).get("today_value_won", 0))
         for r in results
@@ -357,37 +456,36 @@ def calculate_candidates(results):
         trend_codes.add(r["code"])
 
     # ===== 관점 2: 낙폭 분석 (역발상) =====
+    # v5.10: S+A만 (60점 이상)
     drop_codes = set()
     drop_candidates = []
-    # 점수 내림차순 (이미 results가 점수순으로 정렬돼 있지만 안전하게)
     sorted_by_score = sorted(results, key=lambda r: -r.get("score", 0))
     for r in sorted_by_score:
         if r.get("grade") == "경고":
             continue
-        if r.get("score", 0) < 50:
-            break  # 정렬돼 있으니 50 미만 만나면 종료
+        if r.get("score", 0) < 60:
+            break
         drop_candidates.append(_slim_candidate(r))
         drop_codes.add(r["code"])
 
     # ===== SWEET SPOT: 교집합 =====
     sweet_codes = trend_codes & drop_codes
     sweet_candidates = []
-    # 점수 높은 순으로 정렬
     for r in sorted_by_score:
         if r["code"] in sweet_codes:
-            # today_value_won도 함께
             tv = (r.get("details") or {}).get("today_value_won", 0)
             sweet_candidates.append(_slim_candidate(r, today_value_won=tv))
 
     return {
         "criteria": {
             "trend": "거래대금 Top 30 + 외인/기관 5일 매수 + 매수 우세 + 경고 제외",
-            "drop": "점수 50+ + 경고 제외",
+            "drop": "점수 60+ (S/A 등급) + 경고 제외",
             "sweet": "두 관점 교집합",
         },
         "trend": {
             "count": len(trend_candidates),
             "items": trend_candidates,
+            "diagnosis": _diagnose_trend(trend_candidates, None, None),
         },
         "drop": {
             "count": len(drop_candidates),

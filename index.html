@@ -2421,6 +2421,37 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
   font-weight: 800;
 }
 
+/* v5.10: 관점 1 진단 박스 (전체 흐름 한 문단) */
+.mc-cand-diagnosis {
+  margin-top: 4px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: rgba(94, 234, 212, 0.05);
+  border-left: 2px solid var(--brand);
+  border-radius: 0 8px 8px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+.mc-cand-diagnosis strong {
+  color: var(--brand);
+  font-weight: 800;
+}
+
+/* v5.10: 종목별 자금 분석 한 줄 (관점 1) */
+.mc-cand-flowline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.mc-cand-flowline .pos { color: var(--red); }
+.mc-cand-flowline .neg { color: var(--blue); }
+.mc-cand-flowline .hot { color: var(--gold); }
+.mc-cand-flowline .sep { color: var(--text-tertiary); margin: 0 4px; }
+
 </style>
 </head>
 <body>
@@ -2672,6 +2703,7 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
       </div>
 
       <div class="mc-cand-criteria" id="mc-cand-trend-criteria">—</div>
+      <div class="mc-cand-diagnosis" id="mc-cand-trend-diagnosis" style="display:none;"></div>
       <div class="mc-cand-list" id="mc-cand-trend-list">
         <div class="mc-cand-row empty">로딩 중…</div>
       </div>
@@ -2683,7 +2715,7 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
         <div style="flex:1;">
           <div class="mc-card-label">관점 2 · 낙폭 분석 (역발상)</div>
           <div class="mc-card-title-row">
-            <div class="mc-card-title">점수 시스템 50+</div>
+            <div class="mc-card-title">점수 시스템 S/A (60+)</div>
             <button class="mc-info-btn" data-mc-target="mc-info-cand2">?</button>
           </div>
         </div>
@@ -2696,7 +2728,7 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
           평균회귀 관점. 60일 고점에서 충분히 떨어지고 바닥다지기/반등 신호가 보이는 종목.
         </div>
         <ul class="mc-info-panel-list">
-          <li><b>점수 50+</b>: 낙폭 + 바닥다지기 + 반등시작 + 이격도 + 수급 종합</li>
+          <li><b>점수 60+ (S/A 등급)</b>: 낙폭 + 바닥다지기 + 반등시작 + 이격도 + 수급 종합 강한 신호</li>
           <li><b>제외</b>: 경고 등급 (60일 내 ±15% 빈발 등 작전주 의심)</li>
           <li><b>주의</b>: 추세 자체가 약하면 반등 시간 오래 걸릴 수 있음</li>
         </ul>
@@ -3158,7 +3190,7 @@ function renderMarketContext(mc) {
 // ============================================
 
 function mcRenderCandidateRow(item, opts) {
-  // opts: { showRank: true/false, showDrop: true/false, showTodayValue: true/false }
+  // opts: { showRank, showDrop, showTodayValue, showFlowline }
   opts = opts || {};
   const chgCls = mcClassFromPct(item.change_pct);
   const psign = item.change_pct >= 0 ? '+' : '';
@@ -3173,7 +3205,6 @@ function mcRenderCandidateRow(item, opts) {
     metaParts.push(`60d ${item.drop_60d.toFixed(1)}%`);
   }
   if (opts.showTodayValue && item.today_value_won) {
-    // 거래대금은 항상 양수, + 부호 제거
     const tv = mcFormatHan(item.today_value_won).replace(/^\+/, '');
     metaParts.push(`거래대금 ${tv}`);
   }
@@ -3182,14 +3213,63 @@ function mcRenderCandidateRow(item, opts) {
   }
   const meta = metaParts.join(' · ');
 
+  // v5.10: 종목별 자금 분석 한 줄 (관점 1만)
+  let flowline = '';
+  if (opts.showFlowline) {
+    flowline = `<div class="mc-cand-flowline">${mcBuildFlowline(item)}</div>`;
+  }
+
   return `<div class="mc-cand-row">
     <div>
       <div class="mc-cand-name">${item.name} <span class="mc-cand-meta" style="font-size:10px;">${item.code}</span></div>
       <div class="mc-cand-meta">${meta || '—'}</div>
+      ${flowline}
     </div>
     <span class="mc-cand-change ${chgCls}">${psign}${item.change_pct.toFixed(2)}%</span>
     <span class="mc-cand-score ${gradeCls}">${item.score}<span class="grade">/${item.grade}</span></span>
   </div>`;
+}
+
+// v5.10: 종목별 자금 분석 한 줄 (관점 1)
+// 출력 예: "외인 +120억 + 기관 +50억 (5일 모두 매수) · 거래량 평소의 3.2배"
+function mcBuildFlowline(item) {
+  const parts = [];
+
+  // 1. 외인 + 기관 5일 합계
+  const fr = item.foreign_5d_total || 0;
+  const inst = item.inst_5d_total || 0;
+  const fb = item.foreign_buy_days || 0;
+  const ib = item.inst_buy_days || 0;
+
+  if (fr !== 0 || inst !== 0) {
+    const frTxt = fr > 0 ? `<span class="pos">외인 ${mcFormatHan(fr)}</span>`
+                : fr < 0 ? `<span class="neg">외인 ${mcFormatHan(fr)}</span>`
+                : '';
+    const instTxt = inst > 0 ? `<span class="pos">기관 ${mcFormatHan(inst)}</span>`
+                  : inst < 0 ? `<span class="neg">기관 ${mcFormatHan(inst)}</span>`
+                  : '';
+    const flowTxt = [frTxt, instTxt].filter(Boolean).join(' + ');
+
+    // 매수일수 (5일 중 N일)
+    const totalDays = fb + ib;
+    let dayTxt = '';
+    if (totalDays >= 8) dayTxt = ' (5일 거의 매수)';
+    else if (totalDays >= 6) dayTxt = ` (매수 ${fb}+${ib}일)`;
+    else if (totalDays >= 3) dayTxt = ` (매수 ${fb}+${ib}일)`;
+
+    parts.push(flowTxt + dayTxt);
+  }
+
+  // 2. 거래량 폭발 여부
+  const v20 = item.volume_today_vs_20d || 1;
+  if (v20 >= 5) {
+    parts.push(`<span class="hot">거래량 평소의 ${v20.toFixed(1)}배</span>`);
+  } else if (v20 >= 2) {
+    parts.push(`거래량 평소의 ${v20.toFixed(1)}배`);
+  }
+
+  if (parts.length === 0) return '—';
+  return parts.join('<span class="sep">·</span>');
 }
 
 function renderCandidates(cand) {
@@ -3199,12 +3279,22 @@ function renderCandidates(cand) {
   const trend = cand.trend || { count: 0, items: [] };
   document.getElementById('mc-cand-trend-count').textContent = `${trend.count}개`;
   document.getElementById('mc-cand-trend-criteria').textContent = criteria.trend || '';
+
+  // v5.10: 진단 박스
+  const diagEl = document.getElementById('mc-cand-trend-diagnosis');
+  if (trend.diagnosis && trend.count > 0) {
+    diagEl.innerHTML = `<strong>📊 진단:</strong> ${trend.diagnosis}`;
+    diagEl.style.display = 'block';
+  } else {
+    diagEl.style.display = 'none';
+  }
+
   const trendList = document.getElementById('mc-cand-trend-list');
   if (trend.count === 0) {
     trendList.innerHTML = '<div class="mc-cand-row empty">오늘 조건 충족 종목 없음 · 양극화 장 가능성</div>';
   } else {
     trendList.innerHTML = trend.items.map(item =>
-      mcRenderCandidateRow(item, { showRank: true, showTodayValue: true })
+      mcRenderCandidateRow(item, { showRank: true, showTodayValue: true, showFlowline: true })
     ).join('');
   }
 
@@ -3214,7 +3304,7 @@ function renderCandidates(cand) {
   document.getElementById('mc-cand-drop-criteria').textContent = criteria.drop || '';
   const dropList = document.getElementById('mc-cand-drop-list');
   if (drop.count === 0) {
-    dropList.innerHTML = '<div class="mc-cand-row empty">점수 50+ 종목 없음 · 매수 신호 부족</div>';
+    dropList.innerHTML = '<div class="mc-cand-row empty">점수 60+ (S/A) 종목 없음 · 매수 신호 부족</div>';
   } else {
     dropList.innerHTML = drop.items.map(item =>
       mcRenderCandidateRow(item, { showDrop: true })
