@@ -1,11 +1,17 @@
 """
-LIVE TRADE Scanner v3.6
+LIVE TRADE Scanner v3.7
 - 코스피200 + 코스닥150 (350종목)
 - 점수 만점 100점 (환산 없음)
 - 가중치: 낙폭25 + 바닥다지기20 + 반등시작25 + 이격도15 + 수급15 = 100
 - 페널티 별도 차감
 - v3.5: details.chart_60d 추가 (60일 close + MA5/20/60 시계열, PWA 차트용)
 - v3.6: 모든 시간을 KST (Asia/Seoul) 기준으로 통일 (GitHub Actions UTC 컨테이너에서도 정확)
+- v3.7: market_context 통합 (시장 지표 계산), details.today_value_won 추가
+- v3.7.1: get_market_cap 종목별 호출 → get_market_cap_by_ticker 시장 일괄 호출로 교체
+          (종목별 호출에서 KRX hang 사례 있어 안정성 강화, 호출 350회→2회)
+- v3.7.2: analyze_stock의 get_market_ohlcv 호출 전 sleep 0.25s 추가
+          (50종목 쯤에서 KRX rate limit hang 사례 확인)
+          매 종목 진행 표시 + 처리 시간 (s) 출력
 """
 
 import os
@@ -17,6 +23,8 @@ from zoneinfo import ZoneInfo
 KST = ZoneInfo("Asia/Seoul")
 import pandas as pd
 from pykrx import stock
+
+from market_context import build_market_context
 
 # ========================================
 # 설정
@@ -39,6 +47,52 @@ def get_trading_dates(n_days=70):
 
 def safe_div(a, b, default=0):
     return a / b if b != 0 else default
+
+
+# ========================================
+# 시가총액 캐시 (v3.7.1)
+# ========================================
+# 종목별 get_market_cap 호출이 KRX에서 hang 걸리는 사례 있어서
+# 시장 전체(get_market_cap_by_ticker)로 한 번에 받아 dict 캐싱
+_MCAP_CACHE = {}
+
+
+def _find_recent_business_day(max_lookback_days=10):
+    """오늘부터 거꾸로 거슬러 첫 영업일 반환."""
+    today = datetime.now(KST).strftime("%Y%m%d")
+    start = (datetime.now(KST) - timedelta(days=max_lookback_days)).strftime("%Y%m%d")
+    try:
+        dates = stock.get_previous_business_days(fromdate=start, todate=today)
+        if dates:
+            return dates[-1].strftime("%Y%m%d")
+    except Exception as e:
+        print(f"  영업일 조회 실패, today 사용: {e}")
+    return today
+
+
+def fetch_market_cap_cache():
+    """
+    KOSPI + KOSDAQ 전체 종목의 시가총액을 한 번에 받아 _MCAP_CACHE에 저장.
+    종목별 get_market_cap 호출 대비 호출 수 350회 → 2회로 감소.
+    실패해도 분석은 진행됨 (market_cap만 0).
+    """
+    target_date = _find_recent_business_day()
+    print(f"  시가총액 캐시 로딩 (기준일: {target_date})")
+    for market in ["KOSPI", "KOSDAQ"]:
+        try:
+            df = stock.get_market_cap_by_ticker(target_date, market=market)
+            if df is None or df.empty:
+                print(f"    {market}: 데이터 없음")
+                continue
+            for ticker, row in df.iterrows():
+                try:
+                    _MCAP_CACHE[ticker] = int(row["시가총액"])
+                except Exception:
+                    pass
+            print(f"    {market}: {len(df)}종목 로드")
+        except Exception as e:
+            print(f"    {market} 시총 로드 실패: {e}")
+    print(f"  캐시 총 {len(_MCAP_CACHE)}종목")
 
 
 # ========================================
@@ -171,6 +225,8 @@ def analyze_stock(ticker, name, market, daily_supply):
     try:
         today = datetime.now(KST).strftime("%Y%m%d")
         start = (datetime.now(KST) - timedelta(days=100)).strftime("%Y%m%d")
+        # v3.7.2: KRX rate limit 대비 sleep (50종목쯤에서 throttle 걸리는 사례 확인)
+        time.sleep(0.25)
         df = stock.get_market_ohlcv(start, today, ticker)
 
         if df is None or df.empty or len(df) < 30:
@@ -369,11 +425,10 @@ def analyze_stock(ticker, name, market, daily_supply):
         atr = int(df["tr"].iloc[-14:].mean())
 
         # 시가총액
-        try:
-            cap_df = stock.get_market_cap(today, today, ticker)
-            market_cap = int(cap_df["시가총액"].iloc[0]) if not cap_df.empty else 0
-        except Exception:
-            market_cap = 0
+        # v3.7.1: 종목별 호출(get_market_cap) 제거 → 시장 전체 캐시 사용 (_MCAP_CACHE)
+        # 이유: get_market_cap는 종목별 호출에서 KRX hang 발생 사례 있음
+        #       fetch_market_cap_cache()로 시장당 한 번씩만 호출하고 dict 조회
+        market_cap = _MCAP_CACHE.get(ticker, 0)
 
         return {
             "code": ticker,
@@ -399,6 +454,7 @@ def analyze_stock(ticker, name, market, daily_supply):
                 "std_ratio_5d_vs_10d": round(std_ratio, 2),
                 "std_shrink_pct": round((1 - std_ratio) * 100, 1),
                 "avg_value_60d_won": int(df["거래대금"].iloc[-60:].mean()),
+                "today_value_won": int(last["거래대금"]),
                 "big_moves_15pct": int(big_moves),
                 "atr_14": atr,
                 "market_cap": market_cap,
@@ -448,7 +504,7 @@ def analyze_stock(ticker, name, market, daily_supply):
 
 def main():
     print("=" * 60)
-    print("LIVE TRADE Scanner v3.4 (100점 만점)")
+    print("LIVE TRADE Scanner v3.7.2 (100점 + market_context + cap cache + rate limit)")
     print("=" * 60)
 
     with open(TICKERS_FILE, "r", encoding="utf-8") as f:
@@ -458,28 +514,42 @@ def main():
     print(f"\n총 {len(tickers)}개 종목 스캔 시작")
     print(f"시작 시간: {datetime.now(KST).strftime('%H:%M:%S')}\n")
 
-    print("[1/2] 일별 수급 데이터 수집 중...")
+    print("[1/3] 일별 수급 데이터 수집 중...")
     dates = get_trading_dates(n_days=5)
     print(f"  대상 영업일 (최근 5일): {dates}")
 
     daily_supply = fetch_daily_supply(dates, ["KOSPI", "KOSDAQ"])
-    print(f"  수급 데이터 수집 완료: {len(daily_supply)}개 종목\n")
+    print(f"  수급 데이터 수집 완료: {len(daily_supply)}개 종목")
 
-    print("[2/2] 종목별 분석 중...")
+    print("\n  시가총액 캐시 로딩...")
+    fetch_market_cap_cache()
+    print()
+
+    print("[2/3] 종목별 분석 중...")
     results = []
+    import time as _t
     for i, t in enumerate(tickers):
+        # v3.7.1-diag2: 시간 측정 + 매 종목마다 진행 표시 + flush
+        t0 = _t.time()
+        print(f"  [{i+1}/{len(tickers)}] {t['code']} {t['name']} ...", end="", flush=True)
         result = analyze_stock(t["code"], t["name"], t["market"], daily_supply)
+        elapsed = _t.time() - t0
         if result:
             results.append(result)
-        if (i + 1) % 50 == 0:
-            print(f"  진행: {i + 1}/{len(tickers)} ({len(results)}개 분석 성공)")
+            print(f" ✓ {result['score']}점 ({elapsed:.1f}s)", flush=True)
+        else:
+            print(f" ✗ 분석 실패 ({elapsed:.1f}s)", flush=True)
 
     results.sort(key=lambda x: -x["score"])
 
+    print("\n[3/3] 시장 지표 계산 중...")
+    market_context = build_market_context(results)
+
     output = {
         "updated": datetime.now(KST).isoformat(),
-        "version": "v3.4",
+        "version": "v3.7.2",
         "count": len(results),
+        "market_context": market_context,
         "results": results,
     }
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

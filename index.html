@@ -59,6 +59,13 @@
   --price-down: #4A9EFF;
   --border: rgba(255, 255, 255, 0.05);
   --border-strong: rgba(255, 255, 255, 0.1);
+  /* v5.8: market_context 섹션용 색상 (기존 변수와 충돌 없음) */
+  --gold: #FCD34D;
+  --red: #FF5A5A;
+  --blue: #4A9EFF;
+  --orange: #FB923C;
+  --green: #22C55E;
+  --purple: #A78BFA;
   --font-display: 'Bricolage Grotesque', 'Wanted Sans Variable', sans-serif;
   --font-body: 'Wanted Sans Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', -apple-system, sans-serif;
   --font-kr: 'Wanted Sans Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -1927,6 +1934,493 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
 .section { display: none; }
 .section.active { display: block; }
 
+/* ============================================ */
+/* v5.8: Market Context 섹션                    */
+/* (mc- prefix로 기존 클래스명과 충돌 회피)     */
+/* ============================================ */
+
+.mc-section {
+  margin: 16px 20px 8px;
+}
+
+.mc-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.mc-section-title-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.mc-section-title-text .accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--brand);
+}
+.mc-section-title-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.mc-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.mc-card-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.mc-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.mc-card-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.mc-card-title em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* market_context 안에서만 쓰는 ? 펼침 토글 (기존 .info-btn 시스템과 분리) */
+.mc-info-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.mc-info-btn:hover {
+  background: rgba(94, 234, 212, 0.1);
+  color: var(--brand);
+  border-color: rgba(94, 234, 212, 0.3);
+}
+.mc-info-btn.active {
+  background: var(--brand);
+  color: var(--bg-base);
+  border-color: var(--brand);
+}
+.mc-info-panel {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: rgba(94, 234, 212, 0.04);
+  border: 1px solid rgba(94, 234, 212, 0.12);
+  border-radius: 10px;
+}
+.mc-info-panel.show { display: block; animation: mcSlideDown 0.2s ease-out; }
+@keyframes mcSlideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mc-info-panel-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand);
+  margin-bottom: 6px;
+}
+.mc-info-panel-body {
+  font-size: 11px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.mc-info-panel-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.mc-info-panel-list li {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding-left: 10px;
+  position: relative;
+}
+.mc-info-panel-list li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--brand);
+  font-weight: 800;
+}
+.mc-info-panel-list li b { color: var(--text-primary); font-weight: 700; }
+
+/* 가격 등락 (한국 컨벤션: 빨강 상승, 파랑 하락) */
+.mc-up { color: var(--red); }
+.mc-down { color: var(--blue); }
+.mc-zero { color: var(--text-tertiary); }
+
+/* 지수 카드 */
+.mc-indices-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mc-index-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+.mc-index-val {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+.mc-index-change {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 6px;
+}
+.mc-index-change span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+/* 시장 폭 */
+.mc-breadth-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.mc-breadth-big {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: right;
+}
+.mc-breadth-big .unit { font-size: 14px; color: var(--text-tertiary); }
+.mc-breadth-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-top: 4px;
+  text-align: right;
+}
+.mc-breadth-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+  background: var(--bg-inset);
+}
+.mc-breadth-bar-up { background: var(--red); }
+.mc-breadth-bar-unchanged { background: var(--text-tertiary); }
+.mc-breadth-bar-down { background: var(--blue); }
+.mc-breadth-counts {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+}
+.mc-breadth-markets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.mc-breadth-market-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+.mc-breadth-market-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+.mc-breadth-market-val .pct { font-size: 10px; font-weight: 700; }
+
+/* 거래대금 집중도 */
+.mc-volume-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.mc-volume-big {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+}
+.mc-volume-big .unit { font-size: 14px; color: var(--text-tertiary); }
+.mc-volume-sublabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+.mc-volume-row {
+  display: grid;
+  grid-template-columns: 18px 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.mc-volume-row:first-of-type { border-top: 0; }
+.mc-volume-rank {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+.mc-volume-name { font-size: 12px; font-weight: 700; }
+.mc-volume-code {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+.mc-volume-change {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+.mc-volume-score {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+}
+.mc-volume-score .grade { font-size: 9px; color: var(--text-tertiary); }
+.mc-score-s { color: var(--brand); }
+.mc-score-a { color: var(--gold); }
+.mc-score-b { color: var(--text-primary); }
+.mc-score-c { color: var(--text-secondary); }
+.mc-score-d { color: var(--text-tertiary); }
+.mc-score-w { color: var(--orange); }
+
+/* 자금 흐름 */
+.mc-flow-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mc-flow-card {
+  background: var(--bg-inset);
+  border-radius: 10px;
+  padding: 12px;
+}
+.mc-flow-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.mc-flow-val {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+.mc-flow-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* 시그널 풀 분포 (등급 막대) */
+.mc-score-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 60px;
+  margin-bottom: 8px;
+}
+.mc-score-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.mc-score-bar-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+}
+.mc-score-bar-bar {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+}
+.mc-score-bar-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+/* ============================================ */
+/* SECTION 2: Today's Candidates                */
+/* ============================================ */
+
+.mc-cand-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--brand);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.mc-cand-card.drop {
+  border-left-color: var(--gold);
+}
+.mc-cand-card.sweet {
+  border-left-color: var(--brand);
+  border: 1px solid rgba(94, 234, 212, 0.3);
+  border-left-width: 3px;
+  background: linear-gradient(to right, rgba(94, 234, 212, 0.04), var(--bg-card) 40%);
+}
+
+.mc-cand-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.mc-cand-count {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--brand);
+  flex-shrink: 0;
+}
+.mc-cand-card.drop .mc-cand-count { color: var(--gold); }
+.mc-cand-card.sweet .mc-cand-count { color: var(--brand); }
+
+.mc-cand-criteria {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-top: 6px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.mc-cand-list {
+  display: flex;
+  flex-direction: column;
+}
+.mc-cand-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.mc-cand-row:first-of-type { border-top: 0; }
+.mc-cand-row.empty {
+  grid-template-columns: 1fr;
+  text-align: center;
+  padding: 14px 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+.mc-cand-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.mc-cand-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+.mc-cand-meta .pill {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+  margin-right: 4px;
+}
+.mc-cand-change {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+}
+.mc-cand-score {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+  min-width: 40px;
+}
+.mc-cand-score .grade {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  margin-left: 2px;
+}
+
+.mc-disclaimer {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: rgba(252, 211, 77, 0.06);
+  border: 1px solid rgba(252, 211, 77, 0.18);
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.mc-disclaimer b {
+  color: var(--gold);
+  font-weight: 800;
+}
+
 </style>
 </head>
 <body>
@@ -1966,6 +2460,291 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
     <span class="update-bar-date" id="stat-date">—</span>
     <span class="update-bar-val" id="stat-updated">—</span>
   </div>
+
+  <!-- v5.8: Market Context Section -->
+  <div class="mc-section">
+    <div class="mc-section-title">
+      <div class="mc-section-title-text">Market <span class="accent">context</span></div>
+      <div class="mc-section-title-meta" id="mc-updated">—</div>
+    </div>
+
+    <!-- 지수 -->
+    <div class="mc-indices-grid" id="mc-indices">
+      <div class="mc-index-card">
+        <div class="mc-card-label">KOSPI</div>
+        <div class="mc-index-val" id="mc-kospi-val">—</div>
+        <div class="mc-index-change" id="mc-kospi-change"><span class="mc-zero">—</span></div>
+      </div>
+      <div class="mc-index-card">
+        <div class="mc-card-label">KOSDAQ</div>
+        <div class="mc-index-val" id="mc-kosdaq-val">—</div>
+        <div class="mc-index-change" id="mc-kosdaq-change"><span class="mc-zero">—</span></div>
+      </div>
+    </div>
+
+    <!-- 시장 폭 -->
+    <div class="mc-card">
+      <div class="mc-breadth-head">
+        <div style="flex:1;">
+          <div class="mc-card-label">시장 폭 · BREADTH</div>
+          <div class="mc-card-title-row">
+            <div class="mc-card-title" id="mc-breadth-title">—</div>
+            <button class="mc-info-btn" data-mc-target="mc-info-breadth">?</button>
+          </div>
+        </div>
+        <div>
+          <div class="mc-breadth-big" id="mc-breadth-big"><span class="mc-zero">—</span><span class="unit">%</span></div>
+          <div class="mc-breadth-sub">상승 비율</div>
+        </div>
+      </div>
+
+      <div class="mc-info-panel" id="mc-info-breadth">
+        <div class="mc-info-panel-title">시장 폭이란?</div>
+        <div class="mc-info-panel-body">
+          우리 350종목 중 상승한 종목의 비율. 시장 전체가 골고루 오르는지, 소수만 오르는지 측정.
+        </div>
+        <ul class="mc-info-panel-list">
+          <li><b>60%+ 광범위 상승</b> · 어떤 종목이든 오를 가능성 높음</li>
+          <li><b>40~60% 중간</b> · 종목 선별 필요</li>
+          <li><b>40% 미만 좁은 시장</b> · 소수 종목만 오름, 역발상 어려움</li>
+          <li><b>참고</b>: "주도주 안에서 낙폭" 매매 패턴은 좁은 시장에서 더 신중하게</li>
+        </ul>
+      </div>
+
+      <div class="mc-breadth-bar" id="mc-breadth-bar">
+        <div class="mc-breadth-bar-up" style="width:0%;"></div>
+        <div class="mc-breadth-bar-unchanged" style="width:0%;"></div>
+        <div class="mc-breadth-bar-down" style="width:0%;"></div>
+      </div>
+
+      <div class="mc-breadth-counts" id="mc-breadth-counts">
+        <span class="mc-up">▲ — 상승</span>
+        <span class="mc-zero">— 보합</span>
+        <span class="mc-down">▼ — 하락</span>
+      </div>
+
+      <div class="mc-breadth-markets" id="mc-breadth-markets">
+        <div>
+          <div class="mc-breadth-market-label">KOSPI 200</div>
+          <div class="mc-breadth-market-val" id="mc-breadth-kospi">— / —</div>
+        </div>
+        <div>
+          <div class="mc-breadth-market-label">KOSDAQ 150</div>
+          <div class="mc-breadth-market-val" id="mc-breadth-kosdaq">— / —</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 거래대금 집중도 -->
+    <div class="mc-card">
+      <div class="mc-volume-head">
+        <div style="flex:1;">
+          <div class="mc-card-label">거래대금 집중도</div>
+          <div class="mc-card-title-row">
+            <div class="mc-card-title" id="mc-volume-title">—</div>
+            <button class="mc-info-btn" data-mc-target="mc-info-volume">?</button>
+          </div>
+        </div>
+        <div class="mc-volume-big" id="mc-volume-big"><span class="mc-zero">—</span><span class="unit">%</span></div>
+      </div>
+
+      <div class="mc-info-panel" id="mc-info-volume">
+        <div class="mc-info-panel-title">거래대금 집중도란?</div>
+        <div class="mc-info-panel-body">
+          우리 350종목 중 거래대금 상위 10개가 차지하는 비율. 시장 자금이 어디로 쏠리는지.
+        </div>
+        <ul class="mc-info-panel-list">
+          <li><b>30% 미만 분산</b> · 여러 종목에 자금 고루 분산</li>
+          <li><b>30~50% 쏠림</b> · 주도주 형성 중</li>
+          <li><b>50%+ 극단 쏠림</b> · 한쪽으로만 자금 (오늘 같은 양극화 장)</li>
+          <li><b>패턴 활용</b>: 이 상위 종목들의 일시 조정 시점이 진입 기회</li>
+        </ul>
+      </div>
+
+      <div class="mc-volume-sublabel">TODAY VOLUME LEADERS (TOP 10)</div>
+      <div id="mc-volume-leaders">
+        <div class="mc-volume-row"><span class="mc-zero">— 로딩 중 —</span></div>
+      </div>
+    </div>
+
+    <!-- 자금 흐름 -->
+    <div class="mc-card">
+      <div class="mc-breadth-head">
+        <div style="flex:1;">
+          <div class="mc-card-label">시장 자금 흐름</div>
+          <div class="mc-card-title-row">
+            <div class="mc-card-title" id="mc-flow-title">—</div>
+            <button class="mc-info-btn" data-mc-target="mc-info-flow">?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mc-info-panel" id="mc-info-flow">
+        <div class="mc-info-panel-title">시장 자금 흐름이란?</div>
+        <div class="mc-info-panel-body">
+          오늘 시장 전체에서 외국인/기관/개인이 사고 판 금액의 차이. 큰돈이 어디로 가는지 보는 지표.
+        </div>
+        <ul class="mc-info-panel-list">
+          <li><b>외인 매수 + 기관 매수</b> · 강한 상승 동력</li>
+          <li><b>외인 매수 + 기관 매도</b> · 외인 주도</li>
+          <li><b>외인 매도 + 기관 매수</b> · 박스권 가능성</li>
+          <li><b>둘 다 매도</b> · 약세 시장 (개인이 받는 경우 주의)</li>
+        </ul>
+      </div>
+
+      <div class="mc-flow-grid">
+        <div class="mc-flow-card">
+          <div class="mc-flow-label">외국인</div>
+          <div class="mc-flow-val" id="mc-flow-foreign"><span class="mc-zero">—</span></div>
+          <div class="mc-flow-sub" id="mc-flow-foreign-sub">KOSPI — · KOSDAQ —</div>
+        </div>
+        <div class="mc-flow-card">
+          <div class="mc-flow-label">기관</div>
+          <div class="mc-flow-val" id="mc-flow-inst"><span class="mc-zero">—</span></div>
+          <div class="mc-flow-sub" id="mc-flow-inst-sub">KOSPI — · KOSDAQ —</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 시그널 풀 분포 -->
+    <div class="mc-card">
+      <div class="mc-breadth-head">
+        <div style="flex:1;">
+          <div class="mc-card-label">시그널 풀 · 350</div>
+          <div class="mc-card-title-row">
+            <div class="mc-card-title" id="mc-pool-title">—</div>
+            <button class="mc-info-btn" data-mc-target="mc-info-pool">?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mc-info-panel" id="mc-info-pool">
+        <div class="mc-info-panel-title">시그널 풀 분포란?</div>
+        <div class="mc-info-panel-body">
+          우리 점수 시스템(낙폭 기반 역발상)이 매긴 등급 분포. 매수 후보가 몇 개나 되는지 한눈에.
+        </div>
+        <ul class="mc-info-panel-list">
+          <li><b>S 80+</b> · 최우선 후보</li>
+          <li><b>A 60~79</b> · 유효 신호</li>
+          <li><b>B 40~59</b> · 관망</li>
+          <li><b>경고</b> · 작전주 의심 자동 페널티</li>
+        </ul>
+      </div>
+
+      <div class="mc-score-bars" id="mc-score-bars">
+        <!-- JS가 동적으로 채움 -->
+      </div>
+    </div>
+
+    <!-- ============== -->
+    <!-- SECTION 2: TODAY'S CANDIDATES -->
+    <!-- ============== -->
+    <div class="mc-section-title" style="margin-top: 20px;">
+      <div class="mc-section-title-text">Today's <span class="accent">candidates</span></div>
+      <div class="mc-section-title-meta">2가지 관점 · 판단은 사용자</div>
+    </div>
+
+    <!-- 관점 1: 시장 흐름 -->
+    <div class="mc-cand-card" id="mc-cand-trend">
+      <div class="mc-cand-head">
+        <div style="flex:1;">
+          <div class="mc-card-label">관점 1 · 시장 흐름 (주도주)</div>
+          <div class="mc-card-title-row">
+            <div class="mc-card-title">거래대금 + 수급 매수</div>
+            <button class="mc-info-btn" data-mc-target="mc-info-cand1">?</button>
+          </div>
+        </div>
+        <div class="mc-cand-count" id="mc-cand-trend-count">—</div>
+      </div>
+
+      <div class="mc-info-panel" id="mc-info-cand1">
+        <div class="mc-info-panel-title">관점 1: 시장 흐름</div>
+        <div class="mc-info-panel-body">
+          시장이 인정한 주도주 안에서 골라보는 관점. 거래대금이 큰 종목 중 외인/기관 자금이 들어오고 있는 것만.
+        </div>
+        <ul class="mc-info-panel-list">
+          <li><b>풀</b>: 우리 350종목 중 오늘 거래대금 상위 30개</li>
+          <li><b>수급</b>: 외인 + 기관 5일 누적 순매수 &gt; 0</li>
+          <li><b>매수 우세</b>: 5일 중 외인+기관 매수일 5일 이상</li>
+          <li><b>제외</b>: 경고 등급 (작전주 의심)</li>
+          <li><b>패턴 활용</b>: 이 종목들의 일시 조정 시점이 진입 기회</li>
+        </ul>
+      </div>
+
+      <div class="mc-cand-criteria" id="mc-cand-trend-criteria">—</div>
+      <div class="mc-cand-list" id="mc-cand-trend-list">
+        <div class="mc-cand-row empty">로딩 중…</div>
+      </div>
+    </div>
+
+    <!-- 관점 2: 낙폭 분석 -->
+    <div class="mc-cand-card drop" id="mc-cand-drop">
+      <div class="mc-cand-head">
+        <div style="flex:1;">
+          <div class="mc-card-label">관점 2 · 낙폭 분석 (역발상)</div>
+          <div class="mc-card-title-row">
+            <div class="mc-card-title">점수 시스템 50+</div>
+            <button class="mc-info-btn" data-mc-target="mc-info-cand2">?</button>
+          </div>
+        </div>
+        <div class="mc-cand-count" id="mc-cand-drop-count">—</div>
+      </div>
+
+      <div class="mc-info-panel" id="mc-info-cand2">
+        <div class="mc-info-panel-title">관점 2: 낙폭 분석</div>
+        <div class="mc-info-panel-body">
+          평균회귀 관점. 60일 고점에서 충분히 떨어지고 바닥다지기/반등 신호가 보이는 종목.
+        </div>
+        <ul class="mc-info-panel-list">
+          <li><b>점수 50+</b>: 낙폭 + 바닥다지기 + 반등시작 + 이격도 + 수급 종합</li>
+          <li><b>제외</b>: 경고 등급 (60일 내 ±15% 빈발 등 작전주 의심)</li>
+          <li><b>주의</b>: 추세 자체가 약하면 반등 시간 오래 걸릴 수 있음</li>
+        </ul>
+      </div>
+
+      <div class="mc-cand-criteria" id="mc-cand-drop-criteria">—</div>
+      <div class="mc-cand-list" id="mc-cand-drop-list">
+        <div class="mc-cand-row empty">로딩 중…</div>
+      </div>
+    </div>
+
+    <!-- SWEET SPOT: 교집합 -->
+    <div class="mc-cand-card sweet" id="mc-cand-sweet">
+      <div class="mc-cand-head">
+        <div style="flex:1;">
+          <div class="mc-card-label">★ SWEET SPOT · 두 관점 겹침</div>
+          <div class="mc-card-title-row">
+            <div class="mc-card-title">주도주 <em>+</em> 낙폭</div>
+            <button class="mc-info-btn" data-mc-target="mc-info-sweet">?</button>
+          </div>
+        </div>
+        <div class="mc-cand-count" id="mc-cand-sweet-count">—</div>
+      </div>
+
+      <div class="mc-info-panel" id="mc-info-sweet">
+        <div class="mc-info-panel-title">★ SWEET SPOT이란?</div>
+        <div class="mc-info-panel-body">
+          관점 1 + 관점 2 동시 충족. "주도주 안에서 낙폭" 패턴과 정확히 일치하는 종목.
+        </div>
+        <ul class="mc-info-panel-list">
+          <li><b>주도주 검증</b>: 거래대금 상위 + 외인/기관 매수 = 시장 인정</li>
+          <li><b>낙폭 검증</b>: 점수 50+ = 매수 신호 충분</li>
+          <li><b>0개 가능</b>: 양극화 장 또는 추세장에서 빈번. 그땐 관점 1 또는 2 단독으로 보기</li>
+        </ul>
+      </div>
+
+      <div class="mc-cand-list" id="mc-cand-sweet-list">
+        <div class="mc-cand-row empty">로딩 중…</div>
+      </div>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div class="mc-disclaimer">
+      <b>판단은 사용자.</b> 위 후보들은 데이터 기반 필터링 결과일 뿐이며, 매매 결정은 사용자가 직접 시장 상황·종목 펀더멘털·자금 관리·뉴스 등을 종합해 내려야 합니다.
+    </div>
+
+  </div>
+  <!-- /Market Context Section -->
 
   <div class="section-title">
     <div class="section-title-text">Today's <em>signals</em></div>
@@ -2110,8 +2889,14 @@ async function loadScores() {
     const data = await res.json();
     allStocks = data.results || [];
     updatedAt = data.updated || '';
+    // v5.8: market_context 전역 저장 (있을 때만, 하위 호환)
+    window._marketContext = data.market_context || null;
     document.getElementById('status-text').textContent = 'LIVE';
     renderAll();
+    if (window._marketContext) {
+      try { renderMarketContext(window._marketContext); }
+      catch (e) { console.error('renderMarketContext 실패:', e); }
+    }
   } catch (e) {
     document.getElementById('status-text').textContent = 'OFFLINE';
     document.getElementById('signal-list').innerHTML = `
@@ -2121,6 +2906,352 @@ async function loadScores() {
       </div>`;
   }
 }
+
+// ============================================
+// v5.8: Market Context 렌더링
+// ============================================
+
+function mcFormatHan(value) {
+  // 원 단위 정수 → 한국식 억/조 표기
+  // 양/음 부호 포함, 소수점 자리 적절히
+  if (value == null || isNaN(value)) return '—';
+  const abs = Math.abs(value);
+  const sign = value > 0 ? '+' : (value < 0 ? '-' : '');
+  if (abs >= 1e12) return sign + (abs / 1e12).toFixed(1) + '조';
+  if (abs >= 1e8)  return sign + Math.round(abs / 1e8).toLocaleString() + '억';
+  if (abs >= 1e4)  return sign + Math.round(abs / 1e4).toLocaleString() + '만';
+  return sign + Math.round(abs).toLocaleString();
+}
+
+function mcClassFromPct(pct) {
+  // 한국 컨벤션: 빨강 상승, 파랑 하락
+  if (pct > 0.05) return 'mc-up';
+  if (pct < -0.05) return 'mc-down';
+  return 'mc-zero';
+}
+
+function mcClassFromNet(net) {
+  if (net > 0) return 'mc-up';
+  if (net < 0) return 'mc-down';
+  return 'mc-zero';
+}
+
+function mcGradeClass(grade) {
+  switch (grade) {
+    case 'S': return 'mc-score-s';
+    case 'A': return 'mc-score-a';
+    case 'B': return 'mc-score-b';
+    case 'C': return 'mc-score-c';
+    case 'D': return 'mc-score-d';
+    case '경고': return 'mc-score-w';
+    default: return 'mc-score-b';
+  }
+}
+
+function renderMarketContext(mc) {
+  if (!mc) return;
+
+  // ===== 1. 지수 =====
+  const indices = mc.indices || {};
+  ['KOSPI', 'KOSDAQ'].forEach(name => {
+    const data = indices[name];
+    const lname = name.toLowerCase();
+    const valEl = document.getElementById(`mc-${lname}-val`);
+    const chgEl = document.getElementById(`mc-${lname}-change`);
+    if (!valEl || !chgEl) return;
+    if (!data) {
+      valEl.textContent = '—';
+      chgEl.innerHTML = '<span class="mc-zero">데이터 없음</span>';
+      return;
+    }
+    valEl.textContent = data.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const cls = mcClassFromPct(data.change_pct);
+    const sign = data.change >= 0 ? '+' : '';
+    const psign = data.change_pct >= 0 ? '+' : '';
+    chgEl.innerHTML =
+      `<span class="${cls}">${sign}${data.change.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>` +
+      `<span class="${cls}">${psign}${data.change_pct.toFixed(2)}%</span>`;
+  });
+
+  // ===== 2. 시장 폭 =====
+  const breadth = mc.breadth;
+  if (breadth) {
+    const apct = breadth.advance_pct;
+    const total = breadth.total || 1;
+    const adv = breadth.advance || 0;
+    const dec = breadth.decline || 0;
+    const unc = breadth.unchanged || 0;
+    const aPct = (adv / total * 100);
+    const uPct = (unc / total * 100);
+    const dPct = (dec / total * 100);
+
+    // 큰 숫자 색상: 60+ 청록, 40~60 회색, 40 미만 주황
+    let bigColor = 'var(--text-tertiary)';
+    if (apct >= 60) bigColor = 'var(--brand)';
+    else if (apct < 40) bigColor = 'var(--orange)';
+    else bigColor = 'var(--text-primary)';
+
+    const bigEl = document.getElementById('mc-breadth-big');
+    bigEl.style.color = bigColor;
+    bigEl.innerHTML = `${apct.toFixed(0)}<span class="unit">%</span>`;
+
+    // 타이틀: 폭 평가
+    let title = '';
+    if (apct >= 60) title = '광범위 상승 <em style="color:var(--brand);">broad</em>';
+    else if (apct >= 40) title = '혼조 <em>mixed</em>';
+    else title = '좁은 시장 <em style="color:var(--orange);">narrow</em>';
+    document.getElementById('mc-breadth-title').innerHTML = title;
+
+    // 막대
+    const bar = document.getElementById('mc-breadth-bar');
+    bar.innerHTML =
+      `<div class="mc-breadth-bar-up" style="width:${aPct}%;"></div>` +
+      `<div class="mc-breadth-bar-unchanged" style="width:${uPct}%;"></div>` +
+      `<div class="mc-breadth-bar-down" style="width:${dPct}%;"></div>`;
+
+    // 카운트
+    document.getElementById('mc-breadth-counts').innerHTML =
+      `<span class="mc-up">▲ ${adv} 상승</span>` +
+      `<span class="mc-zero">— ${unc} 보합</span>` +
+      `<span class="mc-down">▼ ${dec} 하락</span>`;
+
+    // 시장별
+    if (breadth.kospi200) {
+      const k = breadth.kospi200;
+      const pctCls = mcClassFromPct(k.avg_change);
+      const psign = k.avg_change >= 0 ? '+' : '';
+      document.getElementById('mc-breadth-kospi').innerHTML =
+        `${k.advance} / ${k.total} <span class="pct ${pctCls}">${psign}${k.avg_change.toFixed(2)}%</span>`;
+    }
+    if (breadth.kosdaq150) {
+      const k = breadth.kosdaq150;
+      const pctCls = mcClassFromPct(k.avg_change);
+      const psign = k.avg_change >= 0 ? '+' : '';
+      document.getElementById('mc-breadth-kosdaq').innerHTML =
+        `${k.advance} / ${k.total} <span class="pct ${pctCls}">${psign}${k.avg_change.toFixed(2)}%</span>`;
+    }
+  }
+
+  // ===== 3. 거래대금 집중도 =====
+  const vol = mc.volume_leaders;
+  if (vol) {
+    document.getElementById('mc-volume-big').innerHTML =
+      `${vol.concentration_pct.toFixed(0)}<span class="unit">%</span>`;
+    let vtitle = '';
+    if (vol.concentration_pct >= 50) vtitle = '극단 쏠림 <em style="color:var(--gold);">concentrated</em>';
+    else if (vol.concentration_pct >= 30) vtitle = '주도주 형성 <em>leading</em>';
+    else vtitle = '분산 <em>distributed</em>';
+    document.getElementById('mc-volume-title').innerHTML = vtitle;
+
+    const leadersHtml = (vol.leaders || []).map((l, i) => {
+      const chgCls = mcClassFromPct(l.change_pct);
+      const psign = l.change_pct >= 0 ? '+' : '';
+      const gradeCls = mcGradeClass(l.grade);
+      return `<div class="mc-volume-row">
+        <span class="mc-volume-rank">${i + 1}</span>
+        <div>
+          <div class="mc-volume-name">${l.name}</div>
+          <div class="mc-volume-code">${l.code}</div>
+        </div>
+        <span class="mc-volume-change ${chgCls}">${psign}${l.change_pct.toFixed(2)}%</span>
+        <span class="mc-volume-score ${gradeCls}">${l.score}<span class="grade">/${l.grade}</span></span>
+      </div>`;
+    }).join('');
+    document.getElementById('mc-volume-leaders').innerHTML = leadersHtml ||
+      '<div class="mc-volume-row"><span class="mc-zero">— 없음 —</span></div>';
+  }
+
+  // ===== 4. 자금 흐름 =====
+  const flow = mc.investor_flow || {};
+  const kospi = (flow.KOSPI && flow.KOSPI.investors) || {};
+  const kosdaq = (flow.KOSDAQ && flow.KOSDAQ.investors) || {};
+
+  function netOf(market, who) { return (market[who] && market[who].net) || 0; }
+
+  const forKospi = netOf(kospi, '외국인');
+  const forKosdaq = netOf(kosdaq, '외국인');
+  const forTotal = forKospi + forKosdaq;
+  const instKospi = netOf(kospi, '기관합계');
+  const instKosdaq = netOf(kosdaq, '기관합계');
+  const instTotal = instKospi + instKosdaq;
+
+  document.getElementById('mc-flow-foreign').innerHTML =
+    `<span class="${mcClassFromNet(forTotal)}">${mcFormatHan(forTotal)}</span>`;
+  document.getElementById('mc-flow-foreign-sub').textContent =
+    `KOSPI ${mcFormatHan(forKospi)} · KOSDAQ ${mcFormatHan(forKosdaq)}`;
+  document.getElementById('mc-flow-inst').innerHTML =
+    `<span class="${mcClassFromNet(instTotal)}">${mcFormatHan(instTotal)}</span>`;
+  document.getElementById('mc-flow-inst-sub').textContent =
+    `KOSPI ${mcFormatHan(instKospi)} · KOSDAQ ${mcFormatHan(instKosdaq)}`;
+
+  // 자금 흐름 타이틀
+  const forBuy = forTotal > 0;
+  const instBuy = instTotal > 0;
+  let ftitle = '';
+  if (forBuy && instBuy) ftitle = '외인 매수 <em style="color:var(--brand);">+</em> 기관 매수';
+  else if (!forBuy && !instBuy) ftitle = '외인 매도 <em style="color:var(--orange);">+</em> 기관 매도';
+  else if (forBuy && !instBuy) ftitle = '외인 매수 · 기관 매도';
+  else ftitle = '외인 매도 · 기관 매수';
+  document.getElementById('mc-flow-title').innerHTML = ftitle;
+
+  // ===== 5. 시그널 풀 분포 =====
+  const sd = mc.score_distribution;
+  if (sd) {
+    const counts = sd.counts || {};
+    const grades = ['S', 'A', 'B', 'C', 'D', '경고'];
+    const maxCount = Math.max(...grades.map(g => counts[g] || 0), 1);
+    const colors = {
+      'S': 'var(--brand)',
+      'A': 'var(--gold)',
+      'B': 'var(--text-secondary)',
+      'C': 'var(--text-tertiary)',
+      'D': '#2D3340',
+      '경고': 'var(--orange)',
+    };
+    const numColors = {
+      'S': 'var(--brand)',
+      'A': 'var(--gold)',
+      'B': 'var(--text-primary)',
+      'C': 'var(--text-secondary)',
+      'D': 'var(--text-tertiary)',
+      '경고': 'var(--orange)',
+    };
+    const barsHtml = grades.map(g => {
+      const c = counts[g] || 0;
+      const h = Math.max(2, (c / maxCount) * 50);
+      return `<div class="mc-score-bar-col">
+        <div class="mc-score-bar-num" style="color:${numColors[g]};">${c}</div>
+        <div class="mc-score-bar-bar" style="height:${h}px; background:${colors[g]};"></div>
+        <div class="mc-score-bar-label">${g}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('mc-score-bars').innerHTML = barsHtml;
+
+    const buyCount = sd.buy_candidates || 0;
+    const buyPct = sd.buy_candidates_pct || 0;
+    let ptitle = '';
+    if (buyCount === 0) ptitle = '<span style="color:var(--text-tertiary);">매수 후보 없음</span>';
+    else if (buyPct < 3) ptitle = `매수 후보 <span style="color:var(--gold);">${buyCount}개</span> <span style="color:var(--text-tertiary); font-size:11px; font-weight:600;">(${buyPct.toFixed(1)}%) · 부족</span>`;
+    else ptitle = `매수 후보 <span style="color:var(--brand);">${buyCount}개</span> <span style="color:var(--text-tertiary); font-size:11px; font-weight:600;">(${buyPct.toFixed(1)}%)</span>`;
+    document.getElementById('mc-pool-title').innerHTML = ptitle;
+  }
+
+  // ===== 6. 업데이트 시각 =====
+  if (mc.calculated_at) {
+    try {
+      const d = new Date(mc.calculated_at);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      document.getElementById('mc-updated').textContent = `UPDATED ${hh}:${mm}`;
+    } catch (e) {}
+  }
+
+  // ===== 7. Today's Candidates =====
+  if (mc.candidates) {
+    try { renderCandidates(mc.candidates); }
+    catch (e) { console.error('renderCandidates 실패:', e); }
+  }
+}
+
+// ============================================
+// v5.9: Today's Candidates 렌더링
+// ============================================
+
+function mcRenderCandidateRow(item, opts) {
+  // opts: { showRank: true/false, showDrop: true/false, showTodayValue: true/false }
+  opts = opts || {};
+  const chgCls = mcClassFromPct(item.change_pct);
+  const psign = item.change_pct >= 0 ? '+' : '';
+  const gradeCls = mcGradeClass(item.grade);
+
+  // 메타: 순위 + 낙폭 + 거래대금
+  const metaParts = [];
+  if (opts.showRank && item.volume_rank) {
+    metaParts.push(`<span class="pill">vol #${item.volume_rank}</span>`);
+  }
+  if (opts.showDrop && item.drop_60d != null) {
+    metaParts.push(`60d ${item.drop_60d.toFixed(1)}%`);
+  }
+  if (opts.showTodayValue && item.today_value_won) {
+    // 거래대금은 항상 양수, + 부호 제거
+    const tv = mcFormatHan(item.today_value_won).replace(/^\+/, '');
+    metaParts.push(`거래대금 ${tv}`);
+  }
+  if (item.dominance && item.dominance !== '중립') {
+    metaParts.push(`<span class="pill">${item.dominance}</span>`);
+  }
+  const meta = metaParts.join(' · ');
+
+  return `<div class="mc-cand-row">
+    <div>
+      <div class="mc-cand-name">${item.name} <span class="mc-cand-meta" style="font-size:10px;">${item.code}</span></div>
+      <div class="mc-cand-meta">${meta || '—'}</div>
+    </div>
+    <span class="mc-cand-change ${chgCls}">${psign}${item.change_pct.toFixed(2)}%</span>
+    <span class="mc-cand-score ${gradeCls}">${item.score}<span class="grade">/${item.grade}</span></span>
+  </div>`;
+}
+
+function renderCandidates(cand) {
+  const criteria = cand.criteria || {};
+
+  // 관점 1: 시장 흐름
+  const trend = cand.trend || { count: 0, items: [] };
+  document.getElementById('mc-cand-trend-count').textContent = `${trend.count}개`;
+  document.getElementById('mc-cand-trend-criteria').textContent = criteria.trend || '';
+  const trendList = document.getElementById('mc-cand-trend-list');
+  if (trend.count === 0) {
+    trendList.innerHTML = '<div class="mc-cand-row empty">오늘 조건 충족 종목 없음 · 양극화 장 가능성</div>';
+  } else {
+    trendList.innerHTML = trend.items.map(item =>
+      mcRenderCandidateRow(item, { showRank: true, showTodayValue: true })
+    ).join('');
+  }
+
+  // 관점 2: 낙폭 분석
+  const drop = cand.drop || { count: 0, items: [] };
+  document.getElementById('mc-cand-drop-count').textContent = `${drop.count}개`;
+  document.getElementById('mc-cand-drop-criteria').textContent = criteria.drop || '';
+  const dropList = document.getElementById('mc-cand-drop-list');
+  if (drop.count === 0) {
+    dropList.innerHTML = '<div class="mc-cand-row empty">점수 50+ 종목 없음 · 매수 신호 부족</div>';
+  } else {
+    dropList.innerHTML = drop.items.map(item =>
+      mcRenderCandidateRow(item, { showDrop: true })
+    ).join('');
+  }
+
+  // SWEET SPOT: 교집합
+  const sweet = cand.sweet_spot || { count: 0, items: [] };
+  document.getElementById('mc-cand-sweet-count').textContent = `${sweet.count}개`;
+  const sweetList = document.getElementById('mc-cand-sweet-list');
+  if (sweet.count === 0) {
+    sweetList.innerHTML = '<div class="mc-cand-row empty">★ SWEET SPOT 없음 · 두 관점 모두 충족하는 종목 없음</div>';
+  } else {
+    sweetList.innerHTML = sweet.items.map(item =>
+      mcRenderCandidateRow(item, { showDrop: true, showTodayValue: true })
+    ).join('');
+  }
+}
+
+// mc-info-btn 토글 (한 번만 바인딩)
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.mc-info-btn');
+  if (!btn) return;
+  e.stopPropagation();
+  const targetId = btn.getAttribute('data-mc-target');
+  const panel = document.getElementById(targetId);
+  if (!panel) return;
+  const isOpen = panel.classList.contains('show');
+  // 같은 섹션 안 모든 패널/버튼 닫기
+  document.querySelectorAll('.mc-info-panel').forEach(p => p.classList.remove('show'));
+  document.querySelectorAll('.mc-info-btn').forEach(b => b.classList.remove('active'));
+  if (!isOpen) {
+    panel.classList.add('show');
+    btn.classList.add('active');
+  }
+});
+// ============================================
 
 function loadWatch() {
   try { return JSON.parse(localStorage.getItem(LS_WATCH)) || {}; }
