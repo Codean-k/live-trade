@@ -2480,6 +2480,131 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
   color: var(--gold);
 }
 
+/* v5.12: SWEET TIMING — '주도주 안에서 낙폭' 메인 카드 */
+.mc-sweet-timing {
+  background: linear-gradient(135deg, rgba(252, 211, 77, 0.08), rgba(94, 234, 212, 0.04) 60%, var(--bg-card));
+  border: 1px solid rgba(252, 211, 77, 0.25);
+  border-left: 3px solid var(--gold);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.mc-sweet-timing-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--gold);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
+.mc-sweet-timing-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+.mc-sweet-timing-title em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold);
+}
+.mc-sweet-timing-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.mc-sweet-timing-empty {
+  padding: 12px 8px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.mc-sweet-stock {
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mc-sweet-stock:hover {
+  background: rgba(252, 211, 77, 0.06);
+}
+.mc-sweet-stock:active {
+  transform: scale(0.98);
+}
+.mc-sweet-stock-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.mc-sweet-stock-name {
+  font-size: 14px;
+  font-weight: 800;
+}
+.mc-sweet-stock-name .code {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-left: 6px;
+}
+.mc-sweet-stock-change {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+}
+.mc-sweet-stock-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+.mc-sweet-stock-meta .label {
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-right: 4px;
+}
+.mc-sweet-stock-meta .val {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.mc-sweet-stock-meta .val.up { color: var(--red); }
+.mc-sweet-stock-meta .val.down { color: var(--blue); }
+.mc-sweet-stock-meta .val.gold { color: var(--gold); }
+.mc-sweet-stock-flow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+  line-height: 1.5;
+}
+.mc-sweet-stock-flow .pos { color: var(--red); }
+.mc-sweet-stock-flow .neg { color: var(--blue); }
+.mc-sweet-stock-flow .hot { color: var(--gold); }
+.mc-sweet-stock-hint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  text-align: right;
+  margin-top: 6px;
+  letter-spacing: 0.05em;
+}
+
 /* v5.10: 종목별 자금 분석 한 줄 (관점 1) */
 .mc-cand-flowline {
   font-family: var(--font-mono);
@@ -2746,6 +2871,17 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
 
       <div class="mc-cand-criteria" id="mc-cand-trend-criteria">—</div>
       <div class="mc-cand-diagnosis" id="mc-cand-trend-diagnosis" style="display:none;"></div>
+
+      <!-- v5.12: SWEET TIMING — '주도주 안에서 낙폭' 메인 카드 -->
+      <div class="mc-sweet-timing" id="mc-sweet-timing">
+        <div class="mc-sweet-timing-label">★ SWEET TIMING</div>
+        <div class="mc-sweet-timing-title">주도주 안에서 <em>낙폭</em></div>
+        <div class="mc-sweet-timing-sub">시장이 인정한 자금 유입 종목 중 오늘/최근 조정 진행. 매매 패턴의 핵심.</div>
+        <div id="mc-sweet-timing-list">
+          <div class="mc-sweet-timing-empty">로딩 중…</div>
+        </div>
+      </div>
+
       <div class="mc-cand-list" id="mc-cand-trend-list">
         <div class="mc-cand-row empty">로딩 중…</div>
       </div>
@@ -3321,17 +3457,13 @@ function renderCandidates(cand) {
   document.getElementById('mc-cand-trend-count').textContent = `${trend.count}개`;
   document.getElementById('mc-cand-trend-criteria').textContent = criteria.trend || '';
 
-  // v5.10: 진단 박스
-  // v5.11: 한 문단 → 구조화된 라인 list로 렌더
+  // v5.10/v5.11: 진단 박스
   const diagEl = document.getElementById('mc-cand-trend-diagnosis');
   if (trend.diagnosis && trend.count > 0) {
     let diagHtml = '<div class="mc-cand-diagnosis-title">📊 진단</div>';
-
-    // v5.10 호환: diagnosis가 문자열(옛 형식)이면 한 줄로 표시
     if (typeof trend.diagnosis === 'string') {
       diagHtml += `<div class="mc-cand-diagnosis-line"><span class="icon">📊</span><span class="text">${trend.diagnosis}</span></div>`;
     } else if (Array.isArray(trend.diagnosis)) {
-      // v5.11: list of {icon, kind, text}
       diagHtml += trend.diagnosis.map(line => {
         const kind = line.kind || 'fact';
         const icon = line.icon || '·';
@@ -3339,12 +3471,14 @@ function renderCandidates(cand) {
         return `<div class="mc-cand-diagnosis-line ${kind}"><span class="icon">${icon}</span><span class="text">${text}</span></div>`;
       }).join('');
     }
-
     diagEl.innerHTML = diagHtml;
     diagEl.style.display = 'block';
   } else {
     diagEl.style.display = 'none';
   }
+
+  // v5.12: SWEET TIMING — 주도주 안에서 낙폭
+  renderSweetTiming(trend.items || []);
 
   const trendList = document.getElementById('mc-cand-trend-list');
   if (trend.count === 0) {
@@ -3379,6 +3513,77 @@ function renderCandidates(cand) {
       mcRenderCandidateRow(item, { showDrop: true, showTodayValue: true })
     ).join('');
   }
+}
+
+// v5.12: SWEET TIMING — '주도주 안에서 낙폭' 종목 렌더
+// 관점 1 후보 중 오늘 하락한 것을 골라 상세 카드로 표시
+function renderSweetTiming(trendItems) {
+  const container = document.getElementById('mc-sweet-timing-list');
+  if (!container) return;
+
+  // 필터: 오늘 하락한 주도주만
+  const dropped = trendItems
+    .filter(it => (it.change_pct || 0) < -0.5)
+    .sort((a, b) => (a.change_pct || 0) - (b.change_pct || 0)); // 더 많이 빠진 순
+
+  if (dropped.length === 0) {
+    // 빈 상태: 큰 의미가 있는 메시지
+    const upCount = trendItems.filter(it => (it.change_pct || 0) > 0.5).length;
+    let msg;
+    if (trendItems.length === 0) {
+      msg = '주도주 풀이 비어 있음. 시장 자금이 우리 350종목 안 주도주로 안 들어옴.';
+    } else if (upCount >= trendItems.length * 0.7) {
+      msg = `주도주 ${trendItems.length}개 모두 강세 — 동반 상승 구간.<br>지금은 추격보다 다음 조정 대기.`;
+    } else {
+      msg = `주도주 ${trendItems.length}개 중 오늘 하락 종목 없음.<br>좀 더 관찰 필요.`;
+    }
+    container.innerHTML = `<div class="mc-sweet-timing-empty">${msg}</div>`;
+    return;
+  }
+
+  container.innerHTML = dropped.map(it => mcSweetStockCard(it)).join('');
+}
+
+// SWEET TIMING 종목 카드 (자세한 정보 포함, 클릭 시 종목 상세 모달)
+function mcSweetStockCard(it) {
+  const chgCls = (it.change_pct < 0) ? 'down' : 'up';
+  const psign = it.change_pct >= 0 ? '+' : '';
+  const dropCls = ((it.drop_60d ?? 0) < -15) ? 'gold' : (((it.drop_60d ?? 0) < 0) ? 'down' : '');
+  const gradeCls = mcGradeClass(it.grade);
+
+  // 자금 흐름 한 줄 (mcBuildFlowline 재활용)
+  const flow = mcBuildFlowline(it);
+
+  // 거래대금 표시
+  const tv = it.today_value_won ? mcFormatHan(it.today_value_won).replace(/^\+/, '') : '—';
+
+  // 60d 낙폭
+  const drop60 = (it.drop_60d != null) ? `${it.drop_60d.toFixed(1)}%` : '—';
+
+  // 거래량 배수
+  const v20 = it.volume_today_vs_20d || 1;
+  const v20Cls = (v20 >= 2) ? 'gold' : '';
+  const v20Txt = `${v20.toFixed(1)}배`;
+
+  // 점수
+  const scoreCls = (it.score >= 60) ? 'gold' : '';
+
+  return `<div class="mc-sweet-stock" onclick="window.openModal && window.openModal('${it.code}')">
+    <div class="mc-sweet-stock-head">
+      <div class="mc-sweet-stock-name">${it.name}<span class="code">${it.code}</span></div>
+      <div class="mc-sweet-stock-change mc-${chgCls === 'up' ? 'up' : 'down'}">${psign}${it.change_pct.toFixed(2)}%</div>
+    </div>
+    <div class="mc-sweet-stock-meta">
+      <div><span class="label">vol</span><span class="val">#${it.volume_rank || '—'}</span></div>
+      <div><span class="label">거래대금</span><span class="val">${tv}</span></div>
+      <div><span class="label">60d 낙폭</span><span class="val ${dropCls}">${drop60}</span></div>
+      <div><span class="label">거래량 vs 20d</span><span class="val ${v20Cls}">${v20Txt}</span></div>
+      <div><span class="label">점수</span><span class="val ${scoreCls}">${it.score} / ${it.grade}</span></div>
+      <div><span class="label">수급</span><span class="val">${it.dominance || '—'}</span></div>
+    </div>
+    <div class="mc-sweet-stock-flow">${flow}</div>
+    <div class="mc-sweet-stock-hint">→ TAP FOR DETAIL</div>
+  </div>`;
 }
 
 // mc-info-btn 토글 (한 번만 바인딩)
