@@ -1,5 +1,6 @@
 name: LIVE TRADE Scan
 
+
 on:
   # 평일 09:00~15:40, 30분 간격 (KST = UTC+9)
   # UTC 기준이므로 KST 09:00 = UTC 00:00
