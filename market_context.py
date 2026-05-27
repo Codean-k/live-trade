@@ -334,80 +334,109 @@ def _slim_candidate(r, today_value_won=None, rank=None):
 
 def _diagnose_trend(trend_items, score_dist, breadth):
     """
-    관점 1 (시장 흐름) 후보 12개 전체를 한 문단 진단.
-    "그래서 이게 왜 의미 있어?"에 답함.
+    관점 1 (시장 흐름) 후보 12개 전체를 구조화된 진단 라인 list로 반환.
+    v5.11: 한 문단 → 아이콘 + 짧은 줄들로 분리 (모바일 가독성)
+    
+    각 라인: {"icon": "💰", "kind": "fact|warn|action", "text": "..."}
     """
     if not trend_items:
-        return "조건 충족 종목 없음. 양극화 장 또는 약세 추세 — 시장 자금이 우리 350종목 안 주도주로 안 들어옴."
+        return [{
+            "icon": "⚠️",
+            "kind": "warn",
+            "text": "조건 충족 종목 없음. 양극화 장 또는 약세 추세 — 시장 자금이 우리 350종목 안 주도주로 안 들어옴.",
+        }]
 
     n = len(trend_items)
+    lines = []
 
-    # 자금 강도 집계 (외인+기관 5일 합계)
+    # 자금 강도
     total_combined = sum(it.get("combined_5d", 0) for it in trend_items)
     avg_combined = total_combined / n if n > 0 else 0
+    if avg_combined > 0:
+        lines.append({
+            "icon": "💰",
+            "kind": "fact",
+            "text": f"{n}개 주도주에 외인+기관 5일 평균 <b>{_format_han(int(avg_combined))}</b> 순매수",
+        })
+    else:
+        lines.append({
+            "icon": "💰",
+            "kind": "fact",
+            "text": f"{n}개 주도주 진입, 평균 자금은 약함",
+        })
 
-    # 거래량 폭발 종목 수 (20일 평균 대비 2배+)
-    vol_explode = sum(1 for it in trend_items if it.get("volume_today_vs_20d", 1) >= 2.0)
-
-    # 상승/하락 분포
+    # 모멘텀
+    surge_count = sum(1 for it in trend_items if it.get("change_pct", 0) >= 15)
     up_count = sum(1 for it in trend_items if it.get("change_pct", 0) > 0.5)
     down_count = sum(1 for it in trend_items if it.get("change_pct", 0) < -0.5)
 
-    # 상한가/급등 (15%+)
-    surge_count = sum(1 for it in trend_items if it.get("change_pct", 0) >= 15)
+    if surge_count >= 3:
+        lines.append({
+            "icon": "🔥",
+            "kind": "fact",
+            "text": f"{surge_count}개 종목 <b>15%+ 급등</b> · 모멘텀 폭발 구간",
+        })
+    elif up_count >= n * 0.7:
+        lines.append({
+            "icon": "📈",
+            "kind": "fact",
+            "text": f"{up_count}개 상승 ({int(up_count/n*100)}%) · 동반 강세",
+        })
+    elif down_count >= n * 0.4:
+        lines.append({
+            "icon": "📉",
+            "kind": "fact",
+            "text": f"{down_count}개 하락 ({int(down_count/n*100)}%) · 주도주 내 차별화",
+        })
 
-    # 점수 분포 — A등급 이상 몇 개?
+    # 거래량 폭발
+    vol_explode = sum(1 for it in trend_items if it.get("volume_today_vs_20d", 1) >= 2.0)
+    if vol_explode >= n * 0.5:
+        lines.append({
+            "icon": "⚡",
+            "kind": "fact",
+            "text": f"{vol_explode}개가 평소 거래량 <b>2배+</b> · 시장 관심 집중",
+        })
+
+    # 점수 시스템과의 관계 (경고)
     a_or_above = sum(1 for it in trend_items if it.get("grade") in ("S", "A"))
+    if a_or_above == 0:
+        lines.append({
+            "icon": "⚠️",
+            "kind": "warn",
+            "text": "점수 시스템 A등급(60+) <b>0개</b> · 거래대금/수급은 시장 인정이지만 낙폭+바닥다지기 신호는 아직 부족",
+        })
+    elif a_or_above >= 3:
+        lines.append({
+            "icon": "✨",
+            "kind": "fact",
+            "text": f"A등급 이상 <b>{a_or_above}개</b> 포함 · 자금+점수 동시 충족, SWEET SPOT 후보 풍부",
+        })
 
-    # 거래대금 집중도 — Top 3 이 차지 비중
+    # 쏠림
     sorted_by_vol = sorted(trend_items, key=lambda x: -x.get("today_value_won", 0))
     top3_value = sum(it.get("today_value_won", 0) for it in sorted_by_vol[:3])
     total_value = sum(it.get("today_value_won", 0) for it in trend_items)
     top3_pct = (top3_value / total_value * 100) if total_value > 0 else 0
-
-    # 진단 문장 조립
-    parts = []
-    parts.append(f"오늘 시장 자금이 {n}개 주도주로 유입.")
-
-    if avg_combined > 0:
-        parts.append(f"이 종목들에 외인+기관이 5일 평균 {_format_han(int(avg_combined))} 순매수.")
-
-    # 흐름의 성격
-    if surge_count >= 3:
-        parts.append(f"이 중 {surge_count}개는 15%+ 급등 — 모멘텀 폭발 구간.")
-    elif up_count >= n * 0.7:
-        parts.append(f"{up_count}개가 상승 ({int(up_count/n*100)}%) — 동반 강세.")
-    elif down_count >= n * 0.4:
-        parts.append(f"{down_count}개는 하락 ({int(down_count/n*100)}%) — 주도주 안에서도 차별화 진행.")
-
-    # 거래량 폭발
-    if vol_explode >= n * 0.5:
-        parts.append(f"{vol_explode}개가 평소 거래량의 2배+ — 시장 관심 집중.")
-
-    # 점수와의 관계
-    if a_or_above == 0:
-        parts.append(
-            "주의: 우리 점수 시스템에선 A등급(60+) 0개 — "
-            "거래대금/수급은 시장 인정이지만 낙폭+바닥다지기 신호는 아직 부족."
-        )
-    elif a_or_above >= 3:
-        parts.append(
-            f"A등급 이상 {a_or_above}개 포함 — 자금+점수 동시 충족, SWEET SPOT 후보 풍부."
-        )
-
-    # 집중도
     if top3_pct >= 70:
-        parts.append(f"상위 3종목이 {top3_pct:.0f}% 차지 — 자금 쏠림 극심.")
+        lines.append({
+            "icon": "🎯",
+            "kind": "warn",
+            "text": f"상위 3종목이 <b>{top3_pct:.0f}%</b> 차지 · 자금 쏠림 극심",
+        })
 
-    # 패턴 가이드 (Dean 매매 패턴)
+    # Dean 매매 패턴 가이드
     if down_count >= 2:
         down_names = [it["name"] for it in trend_items if it.get("change_pct", 0) < -0.5][:3]
         if down_names:
-            parts.append(
-                f"'주도주 안에서 낙폭' 패턴 — 하락한 {', '.join(down_names)} 검토."
-            )
+            names_html = ", ".join(f"<b>{n}</b>" for n in down_names)
+            lines.append({
+                "icon": "🎯",
+                "kind": "action",
+                "text": f"'주도주 안에서 낙폭' 패턴 — 하락한 {names_html} 검토",
+            })
 
-    return " ".join(parts)
+    return lines
 
 
 def _format_han(value):

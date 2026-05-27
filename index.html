@@ -2421,21 +2421,63 @@ input { background: none; border: none; color: inherit; font: inherit; outline: 
   font-weight: 800;
 }
 
-/* v5.10: 관점 1 진단 박스 (전체 흐름 한 문단) */
+/* v5.10: 관점 1 진단 박스 (전체 흐름) */
+/* v5.11: 구조화 — 라인별 아이콘 + 종류별 색상 */
 .mc-cand-diagnosis {
   margin-top: 4px;
   margin-bottom: 12px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: rgba(94, 234, 212, 0.05);
   border-left: 2px solid var(--brand);
   border-radius: 0 8px 8px 0;
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--text-primary);
 }
-.mc-cand-diagnosis strong {
+.mc-cand-diagnosis-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--brand);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.mc-cand-diagnosis-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  padding: 4px 0;
+}
+.mc-cand-diagnosis-line + .mc-cand-diagnosis-line {
+  border-top: 1px solid rgba(255,255,255,0.04);
+  margin-top: 2px;
+  padding-top: 6px;
+}
+.mc-cand-diagnosis-line .icon {
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.mc-cand-diagnosis-line .text { flex: 1; }
+.mc-cand-diagnosis-line .text b {
   color: var(--brand);
   font-weight: 800;
+}
+.mc-cand-diagnosis-line.warn .text b {
+  color: var(--orange);
+}
+.mc-cand-diagnosis-line.warn .text {
+  color: var(--text-secondary);
+}
+.mc-cand-diagnosis-line.action {
+  background: rgba(252, 211, 77, 0.05);
+  margin: 4px -8px -4px;
+  padding: 8px;
+  border-radius: 6px;
+  border-top: none !important;
+}
+.mc-cand-diagnosis-line.action .text b {
+  color: var(--gold);
 }
 
 /* v5.10: 종목별 자금 분석 한 줄 (관점 1) */
@@ -3250,12 +3292,11 @@ function mcBuildFlowline(item) {
                   : '';
     const flowTxt = [frTxt, instTxt].filter(Boolean).join(' + ');
 
-    // 매수일수 (5일 중 N일)
+    // 매수일수 (5일 중 N일) — v5.10.1: 분모 명시
     const totalDays = fb + ib;
     let dayTxt = '';
-    if (totalDays >= 8) dayTxt = ' (5일 거의 매수)';
-    else if (totalDays >= 6) dayTxt = ` (매수 ${fb}+${ib}일)`;
-    else if (totalDays >= 3) dayTxt = ` (매수 ${fb}+${ib}일)`;
+    if (totalDays >= 9) dayTxt = ' <span class="hot">(5일 거의 매수)</span>';
+    else dayTxt = ` (외인 ${fb}/5일 · 기관 ${ib}/5일)`;
 
     parts.push(flowTxt + dayTxt);
   }
@@ -3281,9 +3322,25 @@ function renderCandidates(cand) {
   document.getElementById('mc-cand-trend-criteria').textContent = criteria.trend || '';
 
   // v5.10: 진단 박스
+  // v5.11: 한 문단 → 구조화된 라인 list로 렌더
   const diagEl = document.getElementById('mc-cand-trend-diagnosis');
   if (trend.diagnosis && trend.count > 0) {
-    diagEl.innerHTML = `<strong>📊 진단:</strong> ${trend.diagnosis}`;
+    let diagHtml = '<div class="mc-cand-diagnosis-title">📊 진단</div>';
+
+    // v5.10 호환: diagnosis가 문자열(옛 형식)이면 한 줄로 표시
+    if (typeof trend.diagnosis === 'string') {
+      diagHtml += `<div class="mc-cand-diagnosis-line"><span class="icon">📊</span><span class="text">${trend.diagnosis}</span></div>`;
+    } else if (Array.isArray(trend.diagnosis)) {
+      // v5.11: list of {icon, kind, text}
+      diagHtml += trend.diagnosis.map(line => {
+        const kind = line.kind || 'fact';
+        const icon = line.icon || '·';
+        const text = line.text || '';
+        return `<div class="mc-cand-diagnosis-line ${kind}"><span class="icon">${icon}</span><span class="text">${text}</span></div>`;
+      }).join('');
+    }
+
+    diagEl.innerHTML = diagHtml;
     diagEl.style.display = 'block';
   } else {
     diagEl.style.display = 'none';
