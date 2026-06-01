@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-01T18:05:10.560284+09:00",
+  "updated": "2026-06-01T21:22:58.358239+09:00",
   "version": "v3.7.2",
   "count": 350,
   "market_context": {
@@ -8,32 +8,32 @@
         "value": 8788.38,
         "change": 312.23,
         "change_pct": 3.68,
-        "volume": 618167670,
-        "value_amount": 69364477724185,
+        "volume": 636175294,
+        "value_amount": 74330045284623,
         "as_of": "2026-06-01"
       },
       "KOSDAQ": {
         "value": 1050.03,
         "change": -24.77,
         "change_pct": -2.3,
-        "volume": 826578097,
-        "value_amount": 12144840703961,
+        "volume": 835031542,
+        "value_amount": 12237660818428,
         "as_of": "2026-06-01"
       },
       "KOSPI200": {
         "value": 1399.91,
         "change": 57.09,
         "change_pct": 4.25,
-        "volume": 327351995,
-        "value_amount": 62611734593798,
+        "volume": 339002049,
+        "value_amount": 66732983997101,
         "as_of": "2026-06-01"
       },
       "KOSDAQ150": {
         "value": 1850.15,
         "change": -33.18,
         "change_pct": -1.76,
-        "volume": 94283283,
-        "value_amount": 5892527887117,
+        "volume": 95015487,
+        "value_amount": 5948746773531,
         "as_of": "2026-06-01"
       }
     },
@@ -855,7 +855,7 @@
         ]
       }
     },
-    "calculated_at": "2026-06-01T18:05:10.560270+09:00"
+    "calculated_at": "2026-06-01T21:22:58.358225+09:00"
   },
   "results": [
     {
