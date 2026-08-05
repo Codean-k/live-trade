@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-05T17:03:25.809869+09:00",
+  "updated": "2026-08-05T18:24:28.165368+09:00",
   "version": "v3.7.2",
   "count": 350,
   "market_context": {
@@ -8,32 +8,32 @@
         "value": 6598.26,
         "change": 239.31,
         "change_pct": 3.76,
-        "volume": 335163669,
-        "value_amount": 25212869954244,
+        "volume": 338499583,
+        "value_amount": 25657753879758,
         "as_of": "2026-08-05"
       },
       "KOSDAQ": {
         "value": 799.59,
         "change": 18.87,
         "change_pct": 2.42,
-        "volume": 582881118,
-        "value_amount": 6341798497256,
+        "volume": 587546129,
+        "value_amount": 6382739769093,
         "as_of": "2026-08-05"
       },
       "KOSPI200": {
         "value": 1038.59,
         "change": 38.56,
         "change_pct": 3.86,
-        "volume": 147022011,
-        "value_amount": 22261708672441,
+        "volume": 148096214,
+        "value_amount": 22675616046286,
         "as_of": "2026-08-05"
       },
       "KOSDAQ150": {
         "value": 1361.75,
         "change": 22.84,
         "change_pct": 1.71,
-        "volume": 73258568,
-        "value_amount": 3117909722651,
+        "volume": 73745137,
+        "value_amount": 3132737346271,
         "as_of": "2026-08-05"
       }
     },
@@ -198,72 +198,72 @@
         "as_of": "2026-08-05",
         "investors": {
           "외국인": {
-            "buy": 10065887401886,
-            "sell": 8638160059978,
-            "net": 1427727341908
+            "buy": 10501546873944,
+            "sell": 9050213221536,
+            "net": 1451333652408
           },
           "기관합계": {
-            "buy": 7087499386986,
-            "sell": 7364739224556,
-            "net": -277239837570
+            "buy": 7093610963486,
+            "sell": 7377367470856,
+            "net": -283756507370
           },
           "개인": {
-            "buy": 7811628178702,
-            "sell": 8977604256571,
-            "net": -1165976077869
+            "buy": 7843983966852,
+            "sell": 9028379775808,
+            "net": -1184395808956
           },
           "연기금 등": {
-            "buy": 4070576714755,
-            "sell": 4098312676148,
-            "net": -27735961393
+            "buy": 4071655898755,
+            "sell": 4098476932348,
+            "net": -26821033593
           },
           "금융투자": {
-            "buy": 1700660266960,
-            "sell": 1553269888256,
-            "net": 147390378704
+            "buy": 1701338143060,
+            "sell": 1565597719056,
+            "net": 135740424004
           },
           "투신": {
-            "buy": 714094428136,
-            "sell": 607444797928,
-            "net": 106649630208
+            "buy": 717551580936,
+            "sell": 607505663428,
+            "net": 110045917508
           },
-          "_total_value": 25182185727566
+          "_total_value": 25657753879758
         }
       },
       "KOSDAQ": {
         "as_of": "2026-08-05",
         "investors": {
           "외국인": {
-            "buy": 1685978141358,
-            "sell": 1982511201307,
-            "net": -296533059949
+            "buy": 1687691103087,
+            "sell": 1984881589499,
+            "net": -297190486412
           },
           "기관합계": {
-            "buy": 576839004248,
-            "sell": 686084747053,
-            "net": -109245742805
+            "buy": 577747594063,
+            "sell": 687818763591,
+            "net": -110071169528
           },
           "개인": {
-            "buy": 4011593139648,
-            "sell": 3618613993173,
-            "net": 392979146475
+            "buy": 4050100296966,
+            "sell": 3655958105576,
+            "net": 394142191390
           },
           "연기금 등": {
-            "buy": 84398506905,
-            "sell": 92772184803,
-            "net": -8373677898
+            "buy": 84399242905,
+            "sell": 92779906803,
+            "net": -8380663898
           },
           "금융투자": {
-            "buy": 258361726068,
-            "sell": 422125527000,
-            "net": -163763800932
+            "buy": 259042706783,
+            "sell": 423581186718,
+            "net": -164538479935
           },
           "투신": {
-            "buy": 122053586707,
-            "sell": 67033807317,
-            "net": 55019779390
+            "buy": 122180037887,
+            "sell": 67075332917,
+            "net": 55104704970
           },
-          "_total_value": 6340913296699
+          "_total_value": 6382739769093
         }
       }
     },
@@ -326,10 +326,10 @@
             "grade": "D",
             "dominance": "매수",
             "drop_60d": -48.9,
-            "combined_5d": 314293789000,
+            "combined_5d": 318113695000,
             "today_value_won": 754237332000,
-            "foreign_5d_total": 475947664000,
-            "inst_5d_total": -161653875000,
+            "foreign_5d_total": 487446244000,
+            "inst_5d_total": -169332549000,
             "foreign_buy_days": 3,
             "inst_buy_days": 3,
             "volume_today_vs_20d": 0.7,
@@ -366,10 +366,10 @@
             "grade": "C",
             "dominance": "매수",
             "drop_60d": -33.9,
-            "combined_5d": 45354868625,
+            "combined_5d": 45302193625,
             "today_value_won": 234925664400,
-            "foreign_5d_total": -9000045775,
-            "inst_5d_total": 54354914400,
+            "foreign_5d_total": -9075476375,
+            "inst_5d_total": 54377670000,
             "foreign_buy_days": 2,
             "inst_buy_days": 3,
             "volume_today_vs_20d": 2.16,
@@ -466,10 +466,10 @@
             "grade": "D",
             "dominance": "매수",
             "drop_60d": -15.6,
-            "combined_5d": 48318634775,
+            "combined_5d": 48627051575,
             "today_value_won": 142017366750,
-            "foreign_5d_total": -700135150,
-            "inst_5d_total": 49018769925,
+            "foreign_5d_total": -670635250,
+            "inst_5d_total": 49297686825,
             "foreign_buy_days": 4,
             "inst_buy_days": 5,
             "volume_today_vs_20d": 1.5,
@@ -601,7 +601,7 @@
           {
             "icon": "💰",
             "kind": "fact",
-            "text": "16개 주도주에 외인+기관 5일 평균 <b>+2,456억</b> 순매수"
+            "text": "16개 주도주에 외인+기관 5일 평균 <b>+2,459억</b> 순매수"
           },
           {
             "icon": "📈",
@@ -1291,7 +1291,7 @@
         ]
       }
     },
-    "calculated_at": "2026-08-05T17:03:25.809853+09:00"
+    "calculated_at": "2026-08-05T18:24:28.165356+09:00"
   },
   "results": [
     {
@@ -18874,9 +18874,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": 21742561450,
-        "inst_5d_total": -28935743950,
-        "combined_5d": -7193182500,
+        "foreign_5d_total": 21818873950,
+        "inst_5d_total": -28972651450,
+        "combined_5d": -7153777500,
         "foreign_buy_days": 4,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -18902,8 +18902,8 @@
           },
           {
             "date": "0805",
-            "foreign": 2040580875,
-            "inst": 4944374250
+            "foreign": 2116893375,
+            "inst": 4907466750
           }
         ],
         "chart_60d": [
@@ -19375,9 +19375,9 @@
         "candle_today": "장대양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": 6709693900,
-        "inst_5d_total": 16781243300,
-        "combined_5d": 23490937200,
+        "foreign_5d_total": 6713880900,
+        "inst_5d_total": 16805812300,
+        "combined_5d": 23519693200,
         "foreign_buy_days": 4,
         "inst_buy_days": 5,
         "supply_daily": [
@@ -19403,8 +19403,8 @@
           },
           {
             "date": "0805",
-            "foreign": 1559327400,
-            "inst": 13008504500
+            "foreign": 1563514400,
+            "inst": 13033073500
           }
         ],
         "chart_60d": [
@@ -35908,9 +35908,9 @@
         "candle_today": "음봉",
         "candle_2d": "하락장악",
         "candle_3d": null,
-        "foreign_5d_total": 17076194050,
-        "inst_5d_total": -30188163850,
-        "combined_5d": -13111969800,
+        "foreign_5d_total": 17058432850,
+        "inst_5d_total": -30232891750,
+        "combined_5d": -13174458900,
         "foreign_buy_days": 4,
         "inst_buy_days": 0,
         "supply_daily": [
@@ -35936,8 +35936,8 @@
           },
           {
             "date": "0805",
-            "foreign": -1427278500,
-            "inst": -9431837250
+            "foreign": -1445039700,
+            "inst": -9476565150
           }
         ],
         "chart_60d": [
@@ -48934,9 +48934,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -27662053275,
-        "inst_5d_total": 3927978125,
-        "combined_5d": -23734075150,
+        "foreign_5d_total": -27668867275,
+        "inst_5d_total": 3535177925,
+        "combined_5d": -24133689350,
         "foreign_buy_days": 0,
         "inst_buy_days": 4,
         "supply_daily": [
@@ -48962,8 +48962,8 @@
           },
           {
             "date": "0805",
-            "foreign": -21272585250,
-            "inst": -3562506250
+            "foreign": -21279399250,
+            "inst": -3955306450
           }
         ],
         "chart_60d": [
@@ -90491,9 +90491,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": 12897626525,
-        "inst_5d_total": -9531804500,
-        "combined_5d": 3365822025,
+        "foreign_5d_total": 12905851325,
+        "inst_5d_total": -9522804900,
+        "combined_5d": 3383046425,
         "foreign_buy_days": 4,
         "inst_buy_days": 1,
         "supply_daily": [
@@ -90519,8 +90519,8 @@
           },
           {
             "date": "0805",
-            "foreign": -60105700,
-            "inst": 4207413600
+            "foreign": -51880900,
+            "inst": 4216413200
           }
         ],
         "chart_60d": [
@@ -95000,8 +95000,8 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -1030673725,
-        "inst_5d_total": -246252375,
+        "foreign_5d_total": -1191423725,
+        "inst_5d_total": -85502375,
         "combined_5d": -1276926100,
         "foreign_buy_days": 3,
         "inst_buy_days": 3,
@@ -95028,8 +95028,8 @@
           },
           {
             "date": "0805",
-            "foreign": -1667449950,
-            "inst": -1071310100
+            "foreign": -1828199950,
+            "inst": -910560100
           }
         ],
         "chart_60d": [
@@ -99509,9 +99509,9 @@
         "candle_today": "역망치",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": 3894314200,
-        "inst_5d_total": 8521281150,
-        "combined_5d": 12415595350,
+        "foreign_5d_total": 3896699200,
+        "inst_5d_total": 8570438650,
+        "combined_5d": 12467137850,
         "foreign_buy_days": 3,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -99537,8 +99537,8 @@
           },
           {
             "date": "0805",
-            "foreign": 2458983650,
-            "inst": 1182764100
+            "foreign": 2461368650,
+            "inst": 1231921600
           }
         ],
         "chart_60d": [
@@ -110030,9 +110030,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -9000045775,
-        "inst_5d_total": 54354914400,
-        "combined_5d": 45354868625,
+        "foreign_5d_total": -9075476375,
+        "inst_5d_total": 54377670000,
+        "combined_5d": 45302193625,
         "foreign_buy_days": 2,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -110058,8 +110058,8 @@
           },
           {
             "date": "0805",
-            "foreign": -19123350950,
-            "inst": 34661620600
+            "foreign": -19198781550,
+            "inst": 34684376200
           }
         ],
         "chart_60d": [
@@ -112034,9 +112034,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": 1957499295,
-        "inst_5d_total": 199741325,
-        "combined_5d": 2157240620,
+        "foreign_5d_total": 1958451885,
+        "inst_5d_total": 198453275,
+        "combined_5d": 2156905160,
         "foreign_buy_days": 4,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -112062,8 +112062,8 @@
           },
           {
             "date": "0805",
-            "foreign": 764846800,
-            "inst": -282372230
+            "foreign": 765799390,
+            "inst": -283660280
           }
         ],
         "chart_60d": [
@@ -141593,9 +141593,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -2239341435,
-        "inst_5d_total": -46506260,
-        "combined_5d": -2285847695,
+        "foreign_5d_total": -2270259675,
+        "inst_5d_total": -71420780,
+        "combined_5d": -2341680455,
         "foreign_buy_days": 2,
         "inst_buy_days": 2,
         "supply_daily": [
@@ -141621,8 +141621,8 @@
           },
           {
             "date": "0805",
-            "foreign": -2088644090,
-            "inst": -626954505
+            "foreign": -2119562330,
+            "inst": -651869025
           }
         ],
         "chart_60d": [
@@ -142094,9 +142094,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -1043355205,
+        "foreign_5d_total": -1098521405,
         "inst_5d_total": -786768620,
-        "combined_5d": -1830123825,
+        "combined_5d": -1885290025,
         "foreign_buy_days": 4,
         "inst_buy_days": 1,
         "supply_daily": [
@@ -142122,7 +142122,7 @@
           },
           {
             "date": "0805",
-            "foreign": -3047510685,
+            "foreign": -3102676885,
             "inst": -706924850
           }
         ],
@@ -143597,9 +143597,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -4721768300,
-        "inst_5d_total": 468621400,
-        "combined_5d": -4253146900,
+        "foreign_5d_total": -4719220000,
+        "inst_5d_total": 456179700,
+        "combined_5d": -4263040300,
         "foreign_buy_days": 2,
         "inst_buy_days": 2,
         "supply_daily": [
@@ -143625,8 +143625,8 @@
           },
           {
             "date": "0805",
-            "foreign": -2472614750,
-            "inst": -860807200
+            "foreign": -2470066450,
+            "inst": -873248900
           }
         ],
         "chart_60d": [
@@ -147104,9 +147104,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -17842425500,
-        "inst_5d_total": 9440852850,
-        "combined_5d": -8401572650,
+        "foreign_5d_total": -17970010100,
+        "inst_5d_total": 9361447050,
+        "combined_5d": -8608563050,
         "foreign_buy_days": 1,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -147132,8 +147132,8 @@
           },
           {
             "date": "0805",
-            "foreign": -8561320750,
-            "inst": 1356756150
+            "foreign": -8688905350,
+            "inst": 1277350350
           }
         ],
         "chart_60d": [
@@ -149082,9 +149082,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": 475947664000,
-        "inst_5d_total": -161653875000,
-        "combined_5d": 314293789000,
+        "foreign_5d_total": 487446244000,
+        "inst_5d_total": -169332549000,
+        "combined_5d": 318113695000,
         "foreign_buy_days": 3,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -149110,8 +149110,8 @@
           },
           {
             "date": "0805",
-            "foreign": 692118500,
-            "inst": 21516803000
+            "foreign": 12190698500,
+            "inst": 13838129000
           }
         ],
         "chart_60d": [
@@ -149583,10 +149583,10 @@
         "candle_today": "도지",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -214987805500,
-        "inst_5d_total": 95219578500,
-        "combined_5d": -119768227000,
-        "foreign_buy_days": 1,
+        "foreign_5d_total": -201240029500,
+        "inst_5d_total": 96520591500,
+        "combined_5d": -104719438000,
+        "foreign_buy_days": 2,
         "inst_buy_days": 4,
         "supply_daily": [
           {
@@ -149611,8 +149611,8 @@
           },
           {
             "date": "0805",
-            "foreign": -3264200500,
-            "inst": 21588586000
+            "foreign": 10483575500,
+            "inst": 22889599000
           }
         ],
         "chart_60d": [
@@ -152088,9 +152088,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": 9847517500,
-        "inst_5d_total": -48023593000,
-        "combined_5d": -38176075500,
+        "foreign_5d_total": 9277777500,
+        "inst_5d_total": -48196833000,
+        "combined_5d": -38919055500,
         "foreign_buy_days": 3,
         "inst_buy_days": 1,
         "supply_daily": [
@@ -152116,8 +152116,8 @@
           },
           {
             "date": "0805",
-            "foreign": -49849326500,
-            "inst": 33255000500
+            "foreign": -50419066500,
+            "inst": 33081760500
           }
         ],
         "chart_60d": [
@@ -155094,9 +155094,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -25165129250,
-        "inst_5d_total": 40829823500,
-        "combined_5d": 15664694250,
+        "foreign_5d_total": -25163849250,
+        "inst_5d_total": 40902271500,
+        "combined_5d": 15738422250,
         "foreign_buy_days": 1,
         "inst_buy_days": 5,
         "supply_daily": [
@@ -155122,8 +155122,8 @@
           },
           {
             "date": "0805",
-            "foreign": -10874891750,
-            "inst": 12436350500
+            "foreign": -10873611750,
+            "inst": 12508798500
           }
         ],
         "chart_60d": [
@@ -156597,9 +156597,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -700135150,
-        "inst_5d_total": 49018769925,
-        "combined_5d": 48318634775,
+        "foreign_5d_total": -670635250,
+        "inst_5d_total": 49297686825,
+        "combined_5d": 48627051575,
         "foreign_buy_days": 4,
         "inst_buy_days": 5,
         "supply_daily": [
@@ -156625,8 +156625,8 @@
           },
           {
             "date": "0805",
-            "foreign": 8960174125,
-            "inst": 9798661475
+            "foreign": 8989674025,
+            "inst": 10077578375
           }
         ],
         "chart_60d": [
@@ -165114,9 +165114,9 @@
         "candle_today": "양봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -4787356450,
-        "inst_5d_total": 17875585050,
-        "combined_5d": 13088228600,
+        "foreign_5d_total": -4793046650,
+        "inst_5d_total": 17819301550,
+        "combined_5d": 13026254900,
         "foreign_buy_days": 3,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -165142,8 +165142,8 @@
           },
           {
             "date": "0805",
-            "foreign": 249104750,
-            "inst": 2045257550
+            "foreign": 243414550,
+            "inst": 1988974050
           }
         ],
         "chart_60d": [
@@ -165615,9 +165615,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -53430219850,
-        "inst_5d_total": 32253441100,
-        "combined_5d": -21176778750,
+        "foreign_5d_total": -53410328950,
+        "inst_5d_total": 32198272000,
+        "combined_5d": -21212056950,
         "foreign_buy_days": 1,
         "inst_buy_days": 4,
         "supply_daily": [
@@ -165643,8 +165643,8 @@
           },
           {
             "date": "0805",
-            "foreign": -11818887500,
-            "inst": 221904200
+            "foreign": -11798996600,
+            "inst": 166735100
           }
         ],
         "chart_60d": [
@@ -166116,9 +166116,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -37541009175,
-        "inst_5d_total": 23759199550,
-        "combined_5d": -13781809625,
+        "foreign_5d_total": -36731765175,
+        "inst_5d_total": 23654331550,
+        "combined_5d": -13077433625,
         "foreign_buy_days": 2,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -166144,8 +166144,8 @@
           },
           {
             "date": "0805",
-            "foreign": -39119988650,
-            "inst": 4910665100
+            "foreign": -38310744650,
+            "inst": 4805797100
           }
         ],
         "chart_60d": [
@@ -169122,9 +169122,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -16331722400,
-        "inst_5d_total": 9612965650,
-        "combined_5d": -6718756750,
+        "foreign_5d_total": -16334483200,
+        "inst_5d_total": 9587329650,
+        "combined_5d": -6747153550,
         "foreign_buy_days": 1,
         "inst_buy_days": 4,
         "supply_daily": [
@@ -169150,8 +169150,8 @@
           },
           {
             "date": "0805",
-            "foreign": -3632263550,
-            "inst": 2297607200
+            "foreign": -3635024350,
+            "inst": 2271971200
           }
         ],
         "chart_60d": [
@@ -169623,9 +169623,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -63949965200,
-        "inst_5d_total": 38164940500,
-        "combined_5d": -25785024700,
+        "foreign_5d_total": -64195789200,
+        "inst_5d_total": 37874662100,
+        "combined_5d": -26321127100,
         "foreign_buy_days": 1,
         "inst_buy_days": 4,
         "supply_daily": [
@@ -169651,8 +169651,8 @@
           },
           {
             "date": "0805",
-            "foreign": -25817667950,
-            "inst": 7462483350
+            "foreign": -26063491950,
+            "inst": 7172204950
           }
         ],
         "chart_60d": [
@@ -175635,9 +175635,9 @@
         "candle_today": "음봉",
         "candle_2d": null,
         "candle_3d": null,
-        "foreign_5d_total": -870888210,
-        "inst_5d_total": -516041860,
-        "combined_5d": -1386930070,
+        "foreign_5d_total": -885387630,
+        "inst_5d_total": -514830370,
+        "combined_5d": -1400218000,
         "foreign_buy_days": 2,
         "inst_buy_days": 3,
         "supply_daily": [
@@ -175663,8 +175663,8 @@
           },
           {
             "date": "0805",
-            "foreign": -1636440005,
-            "inst": 151320085
+            "foreign": -1650939425,
+            "inst": 152531575
           }
         ],
         "chart_60d": [
