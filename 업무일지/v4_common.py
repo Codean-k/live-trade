@@ -11,6 +11,7 @@ from openpyxl.workbook.defined_name import DefinedName
 
 SRC = "부서_업무일지_v3.xlsx"
 OUT = "부서_업무일지_v4.xlsx"
+OUT2 = "부서_업무일지_v4.xlsx"
 
 F = "Arial"
 NAVY = "1F3864"
@@ -62,6 +63,9 @@ LN_F, LN_L = 109, 508   # 불출 이력
 PJ1, PJ2 = 5, 34        # 사업마스터 (30건)
 PL1, PL2 = 5, 404       # 사업추진일지 (400건)
 SG1, SG2 = 5, 14        # 코드설정 사업구분 (10)
+MD1, MD2 = 5, 18        # 코드설정 매체 종류 (14)
+AS1, AS2 = 5, 11        # 코드설정 분석 상태 (7)
+SP1, SP2 = 6, 305       # 지원 대장 (300건)
 PS1, PS2 = 5, 10        # 코드설정 추진단계 (6)
 JOBS = ["출장", "분석", "교육"]
 
