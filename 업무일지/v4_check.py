@@ -18,7 +18,7 @@ BANNED   = {"XLOOKUP","XMATCH","UNIQUE","FILTER","SEQUENCE","SORT","LET","LAMBDA
 VER = {"IF":"5","SUM":"5","MAX":"5","MIN":"5","COUNT":"5","INDEX":"5","MATCH":"5","AND":"5",
        "OR":"5","NOT":"5","MID":"5","TRIM":"5","SUBSTITUTE":"5","REPT":"5","TEXT":"5",
        "DATE":"5","TODAY":"5","WEEKDAY":"5","CHOOSE":"5","MONTH":"5","DAY":"5","LEN":"5",
-       "LEFT":"5","RIGHT":"5","ABS":"5","ROUND":"5","LARGE":"5","SMALL":"5","SEARCH":"5",
+       "LEFT":"5","RIGHT":"5","ABS":"5","ROUND":"5","INT":"5","MOD":"5","TRUNC":"5","LARGE":"5","SMALL":"5","SEARCH":"5",
        "ISNUMBER":"5","SUMIF":"5","SUMPRODUCT":"97","COUNTIF":"97","COUNTBLANK":"97","COUNTA":"97",
        "COUNTIFS":"2007","SUMIFS":"2007","IFERROR":"2007","EOMONTH":"2007"}
 used = collections.Counter()
