@@ -11,7 +11,7 @@ PLE = R("사업추진일지", "E", PL1, PL2)
 PLI = R("사업추진일지", "I", PL1, PL2)
 PM_A = R("사업마스터", "A", PJ1, PJ2)
 
-ps = wb.create_sheet("사업별 현황")
+ps = fresh_sheet(wb, "사업별 현황")
 ps.sheet_view.showGridLines = False
 title(ps, "사업별 현황  ·  추진 경과 추적",
       "※ 노란 칸에서 사업번호를 고르면 그 사업이 언제 무슨 일을 했는지 전부 정리됩니다.  "

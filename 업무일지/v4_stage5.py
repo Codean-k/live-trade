@@ -4,7 +4,7 @@ import sys; sys.path.insert(0, "/home/user/live-trade/업무일지")
 from v4_common import *
 
 wb = openpyxl.load_workbook(OUT)
-db = wb.create_sheet("대시보드")
+db = fresh_sheet(wb, "대시보드")
 db.sheet_view.showGridLines = False
 title(db, "대시보드  ·  부서 업무 현황",
       "※ 노란 칸(연도·월)만 바꾸면 아래 전부 다시 계산됩니다.  ※ 파일을 열 때마다 오늘 날짜 기준으로 갱신됩니다.  "

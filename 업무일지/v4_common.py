@@ -134,6 +134,12 @@ def widths(ws, spec):
     for col, w in spec.items():
         ws.column_dimensions[col].width = w
 
+def fresh_sheet(wb, name):
+    """같은 이름의 시트가 있으면 지우고 새로 만든다 (스테이지 재실행 대비)"""
+    if name in wb.sheetnames:
+        del wb[name]
+    return wb.create_sheet(name)
+
 def dv_name(ws, rng, name):
     d = DataValidation(type="list", formula1=name, allow_blank=True, showDropDown=False)
     ws.add_data_validation(d); d.add(rng)

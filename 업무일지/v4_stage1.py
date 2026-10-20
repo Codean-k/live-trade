@@ -51,7 +51,7 @@ for nm, ref in [("목록_사업구분", f"코드설정!$Q$5:$Q${SG2}"),
     wb.defined_names.add(DefinedName(nm, attr_text=ref))
 
 # ══════════════════════ 사업마스터
-pm = wb.create_sheet("사업마스터")
+pm = fresh_sheet(wb, "사업마스터")
 title(pm, "사업 마스터  ·  사업 등록 및 예산 관리",
       "※ 사업을 여기 한 번만 등록하면 [사업추진일지]에서 사업번호만 골라도 사업명이 자동으로 채워집니다.  "
       "※ 예산이 없는 사업은 [예산액]을 비워 두세요 — 집행률·잔액은 빈칸으로 남습니다.  "
@@ -110,7 +110,7 @@ pm.conditional_formatting.add(f"L{PJ1}:L{PJ2}", FormulaRule(
     fill=PatternFill("solid", fgColor="FFC7CE"), font=Font(color="9C0006", bold=True), stopIfTrue=False))
 
 # ══════════════════════ 사업추진일지
-pl = wb.create_sheet("사업추진일지")
+pl = fresh_sheet(wb, "사업추진일지")
 title(pl, "사업 추진일지  ·  사업별 추진 경과 기록",
       "※ 사업이 한 일을 날짜별로 한 줄씩 씁니다. 사업번호를 고르면 사업명이 자동으로 채워집니다.  "
       "※ 추진 단계는 선택 입력입니다 — 적으면 [사업마스터]의 현재 단계·진척률이 올라가고, 비워 두면 시간순 기록으로만 남습니다.  "

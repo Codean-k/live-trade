@@ -4,7 +4,7 @@ import sys; sys.path.insert(0, "/home/user/live-trade/업무일지")
 from v4_common import *
 
 wb = openpyxl.load_workbook(OUT)
-ed = wb.create_sheet("교육 이수 현황")
+ed = fresh_sheet(wb, "교육 이수 현황")
 ed.sheet_view.showGridLines = False
 title(ed, "교육 이수 현황  ·  담당자별 연간 교육",
       "※ 입력할 것이 없습니다. [업무일지]에서 직무구분이 '교육'인 기록과 [일일실시사항]의 '교육·훈련'을 모아 셉니다.  "
